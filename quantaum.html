@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>양자 기술 트렌드: 대화형 분석 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Serene Tech Neutrals -->
+    <!-- Application Structure Plan: A non-linear, tab-based dashboard structure was chosen to answer the user's core question: "Is interest in quantum tech sustainable?". Instead of a long scroll, users can explore the key pillars supporting this conclusion—Technological Innovation, Market Dynamics, Ecosystem Support, and Challenges—at their own pace. This thematic approach enhances usability by breaking down a complex report into digestible, interconnected sections, allowing users to build their understanding by exploring evidence from different angles. Key interactions include tab navigation, clickable cards for drill-down information on applications, and interactive charts for market data exploration. -->
+    <!-- Visualization & Content Choices: Report Info: Market growth & investment data -> Goal: Show trends and compare -> Viz: Line & Bar charts -> Interaction: Hover tooltips -> Justification: Best for quantitative data trends -> Library: Chart.js. Report Info: Industry applications -> Goal: Organize & explore -> Viz: Interactive card grid -> Interaction: Click to show details -> Justification: Cleanly presents categories, avoids clutter -> Method: JS/HTML/CSS. Report Info: Technical/Economic/Ethical challenges -> Goal: Condense text -> Viz: Accordion -> Interaction: Click to expand -> Justification: Manages large text blocks effectively -> Method: JS/HTML/CSS. CONFIRMING NO SVG/Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+        }
+        .nav-button.active {
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .tech-tab.active {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .application-card {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .application-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .application-card.active {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8 md:mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-blue-600 mb-2">양자 기술, 꺼지지 않는 불꽃인가?</h1>
+            <p class="text-lg md:text-xl text-slate-600">2024-2025 트렌드 기반 지속 가능성 분석 대시보드</p>
+            <p class="mt-4 max-w-3xl mx-auto text-slate-500">
+                "미래 기술"이라는 인식 때문에 양자 기술에 대한 관심이 쉽게 사그라들 수 있다는 우려가 있습니다. 이 대시보드는 현재의 기술 발전, 시장 동력, 그리고 강력한 생태계가 어떻게 양자 기술의 "불꽃"을 지속적으로 타오르게 하는지에 대한 핵심적인 증거들을 대화형으로 탐색합니다.
+            </p>
+        </header>
+
+        <nav class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8 md:mb-12">
+            <button data-target="summary" class="nav-button active text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-blue-100">핵심 요약</button>
+            <button data-target="technology" class="nav-button text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-blue-100">기술 혁신</button>
+            <button data-target="market" class="nav-button text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-blue-100">시장 동력</button>
+            <button data-target="ecosystem" class="nav-button text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-blue-100">생태계 지원</button>
+            <button data-target="challenges" class="nav-button text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-blue-100">도전과 미래</button>
+        </nav>
+
+        <main id="main-content">
+            <section id="summary" class="content-section active">
+                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-4 text-center">종합 결론: 지속 가능한 성장 기반 마련</h2>
+                    <p class="text-slate-600 mb-6 text-center max-w-4xl mx-auto">
+                        2024-2025년 동향 분석 결과, 양자 기술은 초기 '과대광고' 단계를 넘어 실질적인 기술 성숙, 가시적인 상업화, 견고한 투자, 그리고 확고한 생태계 지원을 통해 지속적인 관심을 유발할 견고한 기반을 마련했습니다. 기술은 단순한 미래의 약속이 아니라, 현재와 미래의 핵심 과제를 해결하는 필수 분야로 자리매김하고 있습니다.
+                    </p>
+                    <div class="grid md:grid-cols-3 gap-4 md:gap-6 text-center">
+                        <div class="bg-blue-50 p-4 rounded-xl">
+                            <h3 class="text-3xl md:text-4xl font-bold text-blue-600">$49B+</h3>
+                            <p class="text-sm text-slate-500 mt-1">누적 글로벌 투자 (2024년 기준)</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-xl">
+                            <h3 class="text-3xl md:text-4xl font-bold text-green-600">27.3%</h3>
+                            <p class="text-sm text-slate-500 mt-1">2025년 예상 시장 성장률</p>
+                        </div>
+                        <div class="bg-indigo-50 p-4 rounded-xl">
+                            <h3 class="text-3xl md:text-4xl font-bold text-indigo-600">24+</h3>
+                            <p class="text-sm text-slate-500 mt-1">국가 양자 전략 보유국</p>
+                        </div>
+                    </div>
+                    <div class="mt-8 p-4 bg-slate-100 rounded-lg">
+                        <h3 class="font-bold text-lg mb-2">핵심 동력 요약</h3>
+                        <ul class="list-none space-y-2 text-slate-700">
+                            <li class="flex items-start"><span class="text-blue-500 mr-2">✔</span> <strong>기술적 성숙:</strong> 큐비트 수 경쟁을 넘어 '유용성'과 '오류 보정'에 집중하며 실용화 단계로 진입.</li>
+                            <li class="flex items-start"><span class="text-blue-500 mr-2">✔</span> <strong>상업화 가속:</strong> 사이버 보안, 신약 개발 등 시급한 문제 해결에 적용되며 실제 가치 입증.</li>
+                            <li class="flex items-start"><span class="text-blue-500 mr-2">✔</span> <strong>견고한 자금:</strong> 민간 투자 급증과 장기적인 정부 자금이 '이중 트랙'으로 안정적 성장 지원.</li>
+                            <li class="flex items-start"><span class="text-blue-500 mr-2">✔</span> <strong>글로벌 경쟁:</strong> 국가 안보와 직결된 '지정학적 필수 기술'로 부상하며 정부의 장기적 관심 확보.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="technology" class="content-section">
+                 <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-2 text-center">기술 혁신의 전환</h2>
+                     <p class="text-slate-600 mb-6 text-center max-w-4xl mx-auto">
+                        양자 기술은 연구 단계를 넘어 실질적인 상업화로 나아가는 중요한 전환점에 있습니다. 이제 기술의 진보는 단순히 이론적 가능성을 넘어, 실제 세계의 문제를 해결할 수 있는 '유용성'을 기준으로 평가됩니다. 아래 탭을 클릭하여 각 분야의 핵심적인 변화를 확인해보세요.
+                    </p>
+                    <div class="mb-6 border-b border-slate-200 flex justify-center gap-2">
+                        <button class="tech-tab border-b-2 border-transparent px-4 py-2 text-lg font-medium active" data-tech="computing">컴퓨팅</button>
+                        <button class="tech-tab border-b-2 border-transparent px-4 py-2 text-lg font-medium" data-tech="communication">통신</button>
+                        <button class="tech-tab border-b-2 border-transparent px-4 py-2 text-lg font-medium" data-tech="sensing">센싱</button>
+                    </div>
+                    <div id="tech-content"></div>
+                </div>
+            </section>
+
+            <section id="market" class="content-section">
+                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-6 text-center">시장 동력: 투자와 상업화</h2>
+                     <p class="text-slate-600 mb-8 text-center max-w-4xl mx-auto">
+                        양자 기술에 대한 관심은 강력한 투자와 가시적인 상업화 성과를 통해 유지되고 있습니다. 투자자들은 이제 장기적인 R&D를 넘어 단기적인 상업적 준비와 기업 배포를 기대하고 있으며, 다양한 산업에서 실제 파일럿 프로젝트가 성공적으로 진행되며 그 가치를 입증하고 있습니다.
+                    </p>
+                    <div class="grid lg:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-bold mb-4 text-center">글로벌 양자 시장 규모 전망</h3>
+                            <div class="chart-container">
+                                <canvas id="marketGrowthChart"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-4 text-center">Q1 2025 투자 동향</h3>
+                            <div class="chart-container">
+                                <canvas id="investmentChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-12">
+                         <h3 class="text-xl font-bold mb-2 text-center">산업별 상용화 동향</h3>
+                         <p class="text-slate-600 mb-6 text-center max-w-4xl mx-auto">
+                            양자 기술은 더 이상 이론이 아닙니다. 아래 카드를 클릭하여 각 산업에서 어떻게 실제 문제를 해결하고 있는지 확인해보세요.
+                        </p>
+                        <div id="application-grid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+                        <div id="application-details" class="mt-6 p-6 bg-slate-100 rounded-lg min-h-[150px] flex items-center justify-center">
+                            <p class="text-slate-500">카드를 선택하여 상세 정보를 확인하세요.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ecosystem" class="content-section">
+                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-6 text-center">강력한 생태계 지원</h2>
+                    <p class="text-slate-600 mb-8 text-center max-w-4xl mx-auto">
+                       기술과 시장의 성장 뒤에는 정부의 전략적 지원, 학계의 끊임없는 연구, 그리고 미래를 이끌 인재를 양성하려는 노력이 있습니다. 이러한 요소들이 결합하여 양자 기술의 지속 가능한 발전을 위한 안정적인 토대를 마련합니다.
+                    </p>
+                    <div class="grid lg:grid-cols-3 gap-8">
+                        <div class="p-6 rounded-lg bg-slate-50 border border-slate-200">
+                            <h3 class="text-xl font-bold mb-2 flex items-center"><span class="text-2xl mr-2">🏛️</span>정부 전략</h3>
+                            <p class="text-slate-600 mb-3">전 세계 국가들은 양자 기술을 국가 안보와 경제 경쟁력의 핵심으로 인식하고, 수십억 달러 규모의 장기 국가 전략을 추진하고 있습니다. 이는 '지정학적 경쟁' 양상을 띠며, 정부의 지속적인 관심과 투자를 보장합니다.</p>
+                            <p id="gov-data" class="font-semibold text-blue-600"></p>
+                        </div>
+                        <div class="p-6 rounded-lg bg-slate-50 border border-slate-200">
+                            <h3 class="text-xl font-bold mb-2 flex items-center"><span class="text-2xl mr-2">🔬</span>학계 연구</h3>
+                            <p class="text-slate-600 mb-3">학계는 상업적 압박에서 벗어나 근본적인 난제를 해결하고 새로운 가능성을 탐구하는 '혁신 엔진' 역할을 합니다. 국제 협력과 기초 연구는 산업이 좌절에 직면하더라도 혁신의 불꽃을 계속 타오르게 합니다.</p>
+                            <p id="acad-data" class="font-semibold text-green-600"></p>
+                        </div>
+                         <div class="p-6 rounded-lg bg-slate-50 border border-slate-200">
+                            <h3 class="text-xl font-bold mb-2 flex items-center"><span class="text-2xl mr-2">👩‍💻</span>인력 개발</h3>
+                            <p class="text-slate-600 mb-3">양자 인재에 대한 수요가 공급을 초과하면서, 정부, 대학, 기업 모두 인재 양성에 막대한 투자를 하고 있습니다. 이는 산업의 장기적인 비전과 지속 가능성에 대한 강력한 신뢰를 보여주는 지표입니다.</p>
+                             <p id="hr-data" class="font-semibold text-indigo-600"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="challenges" class="content-section">
+                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-6 text-center">도전과 미래 전망</h2>
+                    <p class="text-slate-600 mb-8 text-center max-w-4xl mx-auto">
+                        양자 기술의 밝은 미래에도 불구하고, 상용화를 위해 반드시 해결해야 할 기술적, 경제적, 윤리적 과제들이 존재합니다. 이러한 위험을 인식하고 '책임감 있는 혁신'을 통해 선제적으로 대응하는 것이 지속적인 대중의 신뢰를 얻고 성공적으로 나아가는 열쇠입니다.
+                    </p>
+                    <div id="accordion-container" class="space-y-4 max-w-4xl mx-auto"></div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const data = {
+                tech: {
+                    computing: {
+                        title: '양자 컴퓨팅: "큐비트 수"를 넘어 "유용성"으로',
+                        icon: '💻',
+                        content: "초기 양자 컴퓨팅 경쟁이 단순히 큐비트 수를 늘리는 데 집중했다면, 이제는 큐비트의 질, 즉 '오류율'과 '안정성'이 핵심 지표가 되었습니다. 이는 양자 컴퓨터가 실제 문제를 해결할 수 있는 신뢰성 있는 도구로 성숙하고 있음을 의미합니다. Microsoft, IBM 등 주요 기업들은 오류 보정 기술을 통해 상업적으로 유의미한 계산을 수행하는 데 박차를 가하고 있습니다.",
+                        points: [
+                            "Microsoft 'Majorana 1' 칩: 1%의 낮은 오류율 달성",
+                            "IBM 'Quantum System Two': 유틸리티 규모 워크로드 지원",
+                            "초점 이동: 원시 성능 → 오류 보정 및 신뢰성"
+                        ]
+                    },
+                    communication: {
+                        title: '양자 통신: "사이버 보안"이라는 시급한 상업적 동인',
+                        icon: '🔒',
+                        content: "미래의 양자 컴퓨터가 현재의 암호 체계를 무력화할 수 있다는 위협('수확 후 해독' 공격)은 양자 통신 기술의 시급한 상업적 동력이 되고 있습니다. 양자 키 분배(QKD) 기술은 이론적으로 해독이 불가능한 통신을 제공하여 금융, 국방 등 민감 데이터를 보호하는 핵심 솔루션으로 부상하고 있습니다.",
+                        points: [
+                            "주요 동인: 양자 컴퓨팅에 의한 현재 암호체계 해독 위협",
+                            "핵심 기술: 양자 키 분배(QKD)로 원천적 보안 제공",
+                            "상업화 단계: 금융, 국방 등에서 초기 채택 시작"
+                        ]
+                    },
+                    sensing: {
+                        title: '양자 센싱: 상용화의 "가교 기술"',
+                        icon: '📡',
+                        content: "양자 센싱은 다른 양자 기술 분야보다 빠르게 상업적 성숙도에 도달하여, 전체 양자 생태계의 모멘텀을 유지하는 '가교 기술' 역할을 하고 있습니다. GPS 없이도 정밀 항해가 가능한 내비게이션, 질병의 조기 진단 등 즉각적인 응용 분야에서 가시적인 성과를 내며 수익을 창출하고, 이는 다시 컴퓨팅, 통신 분야의 발전을 지원하는 선순환을 만듭니다.",
+                        points: [
+                            "즉각적 상용화: 의료 영상, 자율주행, 자원 탐사 등",
+                            "높은 민감도: 기존 센서의 한계를 뛰어넘는 정밀 측정",
+                            "생태계 기여: 단기적 성공으로 장기적 R&D 지원"
+                        ]
+                    }
+                },
+                applications: [
+                    { id: 'healthcare', name: '신약 개발 및 헬스케어', icon: '💊', details: "양자 컴퓨터는 분자 시뮬레이션을 가속화하여 신약 개발 기간을 획기적으로 단축합니다. 또한 양자 센서는 암과 같은 질병의 조기 진단 정확도를 높여 개인 맞춤형 의학 시대를 열고 있습니다. 현재 활발한 연구 및 초기 파일럿 단계에 있습니다." },
+                    { id: 'finance', name: '금융 모델링', icon: '💹', details: "금융 부문에서는 포트폴리오 최적화, 위험 분석, 사기 탐지에 양자 알고리즘이 활용됩니다. 방대한 데이터를 실시간으로 처리하여 기존 컴퓨터로는 불가능했던 복잡한 패턴을 발견하며, 실제 파일럿 프로젝트들이 진행 중입니다." },
+                    { id: 'security', name: '사이버 보안', icon: '🛡️', details: "양자 기술은 현재 암호 체계에 위협이 되지만, 동시에 양자 후 암호(PQC)와 양자 키 분배(QKD)라는 강력한 방패를 제공합니다. 이는 국가 안보와 직결된 분야로, 투자가 가장 활발한 영역 중 하나입니다." },
+                    { id: 'logistics', name: '공급망 및 물류', icon: '🚚', details: "복잡한 글로벌 공급망에서 최적의 경로를 찾고 비용을 절감하는 문제는 양자 컴퓨팅이 가장 큰 장점을 보일 수 있는 분야입니다. 항공, 해운 등에서 효율성을 극대화하기 위한 개념 증명(PoC)이 진행되고 있습니다." },
+                    { id: 'ai', name: '인공지능(AI) 강화', icon: '🤖', details: "양자 컴퓨팅은 AI, 특히 머신러닝 알고리즘의 학습 속도와 정확도를 비약적으로 향상시킬 잠재력을 가집니다. 양자와 AI의 시너지는 미래 기술 혁신의 핵심으로 여겨지며, 기초 연구가 활발히 이루어지고 있습니다." },
+                    { id: 'energy', name: '에너지 및 기후', icon: '🌍', details: "전력망 최적화, 효율적인 배터리 소재 개발, 정확한 기후 변화 모델링 등 에너지와 환경 문제 해결에 양자 시뮬레이션이 활용될 수 있습니다. 지속 가능한 미래를 위한 핵심 기술로 주목받고 있습니다." },
+                    { id: 'navigation', name: 'GPS 미작동 내비게이션', icon: '🛰️', details: "양자 센서를 이용한 관성 항법 장치는 GPS 신호가 닿지 않는 수중, 지하, 실내에서도 정확한 위치 정보를 제공할 수 있습니다. 자율주행차, 잠수함, 도심 항공 모빌리티(UAM)의 핵심 기술로 개발되고 있습니다." },
+                    { id: 'mapping', name: '지하 매핑', icon: '🗺️', details: "양자 중력 센서는 지하에 매설된 파이프라인, 케이블이나 숨겨진 광물 자원을 지상에서 정밀하게 탐지할 수 있습니다. 인프라 관리와 자원 탐사 분야에서 이미 상업적 활용이 시작되었습니다." }
+                ],
+                challenges: [
+                    { title: '기술적 난관', icon: '🔧', content: '큐비트는 외부 노이즈에 매우 민감하여 계산 오류를 일으키기 쉽습니다. 이러한 오류를 실시간으로 보정하는 기술(오류 보정)과 수백만 큐비트 규모로 시스템을 안정적으로 확장하는 것은 여전히 가장 큰 기술적 과제입니다. 이는 근본적인 물리 법칙의 한계라기보다는 해결 가능한 "공학적 문제"로 여겨집니다.' },
+                    { title: '경제 및 상업화 장벽', icon: '💰', content: '양자 컴퓨터 개발 및 운영에는 막대한 비용이 듭니다. 투자자들은 이제 이론적 가능성을 넘어, 특정 문제에서 기존 컴퓨터보다 확실한 이점(양자 우위)을 보여주고 명확한 투자 수익(ROI)을 증명하라고 요구하고 있습니다. 가치 제안을 명확히 하는 것이 중요합니다.' },
+                    { title: '사회 및 윤리적 함의', icon: '🧑‍🤝‍🧑', content: '강력한 양자 컴퓨터는 개인정보 보호와 국가 안보에 심각한 위협(암호 해독)이 될 수 있습니다. 또한 기술 접근성의 격차가 불평등을 심화시키거나, 일자리를 대체할 수 있다는 우려도 있습니다. 이러한 문제에 대해 "책임감 있는 혁신" 관점에서 선제적으로 대응하는 것이 중요합니다.' },
+                     { title: '"과대광고 주기" 관리', icon: '📈', content: '모든 신기술과 마찬가지로 양자 기술 역시 과장된 기대의 위험이 존재합니다. 미디어와 업계가 단기적인 성과를 부풀리면, 기대에 미치지 못했을 때 실망감으로 이어져 투자 위축을 겪을 수 있습니다(과대광고 붕괴). 현실적인 기대를 설정하고 꾸준한 진전을 투명하게 공유하는 것이 필수적입니다.' }
+                ],
+                marketData: {
+                    globalMarketSize: {
+                        years: [2024, 2025, 2029, 2035],
+                        values: [1.48, 1.88, 4.89, 17.40]
+                    },
+                    investmentData: {
+                        labels: ["양자 컴퓨팅", "양자 통신", "양자 센싱", "소프트웨어/기타"],
+                        values: [10.07, 3.5, 2.5, 1.5]
+                    }
+                },
+                ecosystemData: {
+                    gov: "누적 공공 투자: $42B+ (2024년 기준)",
+                    acad: "IYQ 2025 지정 (UN): 국제 협력 강화",
+                    hr: "양자 직무 포스팅 450%+ 증가 (2018-2023)"
+                }
+            };
+
+            const navButtons = document.querySelectorAll('.nav-button');
+            const contentSections = document.querySelectorAll('.content-section');
+            const techTabs = document.querySelectorAll('.tech-tab');
+            const techContentContainer = document.getElementById('tech-content');
+            const appGrid = document.getElementById('application-grid');
+            const appDetails = document.getElementById('application-details');
+            const accordionContainer = document.getElementById('accordion-container');
+
+            function switchTab(targetId) {
+                contentSections.forEach(section => {
+                    section.classList.toggle('active', section.id === targetId);
+                });
+                navButtons.forEach(button => {
+                    button.classList.toggle('active', button.dataset.target === targetId);
+                });
+            }
+
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => switchTab(button.dataset.target));
+            });
+            
+            function renderTechContent(techId) {
+                const tech = data.tech[techId];
+                techContentContainer.innerHTML = `
+                    <div class="p-4 bg-slate-50 rounded-lg">
+                        <h3 class="text-xl font-bold mb-3 flex items-center"><span class="text-2xl mr-2">${tech.icon}</span>${tech.title}</h3>
+                        <p class="text-slate-600 mb-4">${tech.content}</p>
+                        <ul class="space-y-1">
+                            ${tech.points.map(point => `<li class="flex items-center text-slate-700"><span class="text-green-500 mr-2">✓</span>${point}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
+            techTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    techTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    renderTechContent(tab.dataset.tech);
+                });
+            });
+
+            function renderApplicationGrid() {
+                appGrid.innerHTML = data.applications.map(app => `
+                    <div class="application-card bg-white p-4 rounded-lg border-2 border-transparent" data-id="${app.id}">
+                        <div class="flex items-center">
+                            <span class="text-3xl mr-3">${app.icon}</span>
+                            <h4 class="font-bold text-base">${app.name}</h4>
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.querySelectorAll('.application-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const appId = card.dataset.id;
+                        const appData = data.applications.find(a => a.id === appId);
+                        
+                        document.querySelectorAll('.application-card').forEach(c => c.classList.remove('active'));
+                        card.classList.add('active');
+
+                        appDetails.innerHTML = `
+                            <div class="text-left w-full">
+                                <h4 class="font-bold text-lg mb-2 flex items-center"><span class="text-2xl mr-2">${appData.icon}</span>${appData.name}</h4>
+                                <p class="text-slate-700">${appData.details}</p>
+                            </div>
+                        `;
+                    });
+                });
+            }
+
+            function renderAccordion() {
+                accordionContainer.innerHTML = data.challenges.map((item, index) => `
+                    <div class="border border-slate-200 rounded-lg">
+                        <button class="accordion-header w-full text-left p-4 flex justify-between items-center bg-slate-100 hover:bg-slate-200 rounded-t-lg" data-index="${index}">
+                            <h3 class="font-bold text-lg flex items-center"><span class="text-2xl mr-3">${item.icon}</span>${item.title}</h3>
+                            <span class="transform transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content bg-white p-4 rounded-b-lg">
+                            <p class="text-slate-600">${item.content}</p>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.querySelectorAll('.accordion-header').forEach(header => {
+                    header.addEventListener('click', () => {
+                        const content = header.nextElementSibling;
+                        const arrow = header.querySelector('span');
+                        const isOpen = content.style.maxHeight;
+
+                        if (isOpen && content.style.maxHeight !== '0px') {
+                            content.style.maxHeight = '0px';
+                            arrow.style.transform = 'rotate(0deg)';
+                        } else {
+                            content.style.maxHeight = content.scrollHeight + 'px';
+                            arrow.style.transform = 'rotate(180deg)';
+                        }
+                    });
+                });
+            }
+            
+            function renderEcosystemData() {
+                document.getElementById('gov-data').textContent = data.ecosystemData.gov;
+                document.getElementById('acad-data').textContent = data.ecosystemData.acad;
+                document.getElementById('hr-data').textContent = data.ecosystemData.hr;
+            }
+
+            const marketGrowthCtx = document.getElementById('marketGrowthChart').getContext('2d');
+            new Chart(marketGrowthCtx, {
+                type: 'line',
+                data: {
+                    labels: data.marketData.globalMarketSize.years,
+                    datasets: [{
+                        label: '시장 규모 (십억 달러)',
+                        data: data.marketData.globalMarketSize.values,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '십억 달러 ($B)' }
+                        },
+                        x: {
+                            title: { display: true, text: '연도' }
+                        }
+                    }
+                }
+            });
+
+            const investmentCtx = document.getElementById('investmentChart').getContext('2d');
+            new Chart(investmentCtx, {
+                type: 'bar',
+                data: {
+                    labels: data.marketData.investmentData.labels,
+                    datasets: [{
+                        label: '투자 비중 (단위: 억 달러)',
+                        data: data.marketData.investmentData.values,
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(139, 92, 246, 0.7)',
+                            'rgba(107, 114, 128, 0.7)'
+                        ]
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: '투자액 (억 달러)' }
+                        }
+                    }
+                }
+            });
+            
+            renderTechContent('computing');
+            renderApplicationGrid();
+            renderAccordion();
+            renderEcosystemData();
+        });
+    </script>
+</body>
+</html>

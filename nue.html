@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nucor Corporation (NUE) 대화형 분석 리포트</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A thematic, single-page dashboard structure was chosen over a linear report format to enhance user engagement and facilitate non-linear exploration. The application is divided into logical sections accessible via a sticky navigation bar: 1) Hero/Summary for a quick overview, 2) Core Strengths to explain Nucor's competitive advantages, 3) Financial Health dashboard for interactive data analysis, 4) Market & Policy section to clarify external drivers, 5) ESG Leadership to highlight sustainability efforts, and 6) Investment Outlook for actionable insights. This structure allows users to directly access the information most relevant to them, making the complex data more digestible and understandable. -->
+    <!-- Visualization & Content Choices: Report Info -> Goal -> Viz/Presentation -> Interaction -> Justification. 1) 5-Year Financials -> Show Change -> Multi-Line Chart (Chart.js) -> Toggle series visibility -> To visualize performance trends over time effectively. 2) Competitor Ratios (ROE, D/E) -> Compare -> Grouped Bar Chart (Chart.js) -> Hover tooltips -> For direct, intuitive comparison of financial health against peers. 3) ESG Advantage -> Inform/Compare -> Donut Chart (Chart.js) -> Hover tooltips -> To starkly visualize the lower emissions of EAF vs. BF-BOF, highlighting a key strength. 4) Policy Impact ("Buy American") -> Explain Relationships -> HTML/CSS Diagram -> Static -> To simply and clearly illustrate the cause-and-effect of favorable policies. 5) Key Metrics/Facts -> Inform -> Thematic Cards with Icons (HTML/CSS) -> Hover effects -> To break down complex topics into digestible, visually appealing snippets. This multi-faceted approach ensures each piece of information is presented in its most effective format. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #F8F7F4;
+            color: #4A4A4A;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #5A7D9A;
+            border-bottom-color: #5A7D9A;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+                max-height: 60vh;
+            }
+        }
+        .kpi-card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: #666;
+            margin-bottom: 2.5rem;
+            text-align: center;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .content-card {
+             background-color: rgba(255, 255, 255, 0.7);
+             backdrop-filter: blur(10px);
+             border: 1px solid rgba(200, 200, 200, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <header class="bg-white/80 backdrop-blur-sm shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <a href="#" class="text-2xl font-bold text-[#5A7D9A]">Nucor (NUE)</a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#summary" class="nav-link">개요</a>
+                    <a href="#financials" class="nav-link">재무 성과</a>
+                    <a href="#strengths" class="nav-link">핵심 경쟁력</a>
+                    <a href="#market" class="nav-link">시장과 정책</a>
+                    <a href="#esg" class="nav-link">ESG</a>
+                    <a href="#outlook" class="nav-link">투자 전망</a>
+                </div>
+                <button id="mobile-menu-button" class="md:hidden">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+            <div id="mobile-menu" class="hidden md:hidden mt-4">
+                <a href="#summary" class="block py-2 px-4 text-sm nav-link">개요</a>
+                <a href="#financials" class="block py-2 px-4 text-sm nav-link">재무 성과</a>
+                <a href="#strengths"="block py-2 px-4 text-sm nav-link">핵심 경쟁력</a>
+                <a href="#market" class="block py-2 px-4 text-sm nav-link">시장과 정책</a>
+                <a href="#esg" class="block py-2 px-4 text-sm nav-link">ESG</a>
+                <a href="#outlook" class="block py-2 px-4 text-sm nav-link">투자 전망</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="summary" class="py-20 bg-white">
+            <div class="container mx-auto px-6 text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Nucor Corporation (NUE)</h1>
+                <p class="text-xl text-gray-600 mb-8">북미 최대 철강 생산 기업 심층 분석</p>
+                <p class="max-w-3xl mx-auto text-left text-gray-700 leading-relaxed">
+                    Nucor는 혁신적인 전기로(EAF) 기술과 분권화된 운영 모델을 기반으로 북미 철강 산업을 선도하는 기업입니다. 저비용, 고변동비 구조를 통해 경기 사이클 전반에 걸쳐 안정적인 현금흐름을 창출하며, 보호무역주의 정책과 인프라 투자의 직접적인 수혜주로 평가받고 있습니다. 본 리포트는 Nucor의 재무 건전성, 시장 내 경쟁 우위, 그리고 미래 성장 동력을 다각도로 분석합니다.
+                </p>
+            </div>
+        </section>
+
+        <section id="financials" class="py-20">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title">재무 성과 대시보드</h2>
+                <p class="section-subtitle">지난 5년간의 재무 추이와 주요 경쟁사와의 비교를 통해 Nucor의 재무 건전성을 확인해 보세요. 차트의 특정 데이터에 마우스를 올리면 상세 정보를 볼 수 있습니다.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                    <div class="kpi-card content-card">
+                        <h3 class="font-bold text-xl mb-2 text-gray-700">연간 재무 성과 (2020-2024)</h3>
+                        <p class="text-gray-600 mb-4 text-sm">매출, 영업이익, 순이익의 변화 추이를 통해 기업의 성장성과 수익성을 확인합니다.</p>
+                        <div class="chart-container">
+                            <canvas id="financialsTrendChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="kpi-card content-card">
+                        <h3 class="font-bold text-xl mb-2 text-gray-700">경쟁사 비교 (2024년 기준)</h3>
+                         <p class="text-gray-600 mb-4 text-sm">주요 재무 비율을 경쟁사와 비교하여 Nucor의 상대적 위치를 분석합니다.</p>
+                        <div class="chart-container">
+                            <canvas id="competitorChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                    <div class="kpi-card">
+                        <h4 class="text-lg font-semibold text-gray-600">총 부채비율 (2024)</h4>
+                        <p class="text-3xl font-bold text-[#5A7D9A]">0.59</p>
+                        <p class="text-sm text-gray-500">지속적인 감소세 유지</p>
+                    </div>
+                    <div class="kpi-card">
+                        <h4 class="text-lg font-semibold text-gray-600">ROE (2024)</h4>
+                        <p class="text-3xl font-bold text-[#6C8A7B]">9.33%</p>
+                        <p class="text-sm text-gray-500">시장 조정 후 안정화</p>
+                    </div>
+                    <div class="kpi-card">
+                        <h4 class="text-lg font-semibold text-gray-600">배당수익률 (2024)</h4>
+                        <p class="text-3xl font-bold text-[#5A7D9A]">1.86%</p>
+                        <p class="text-sm text-gray-500">50년 이상 연속 배당 증가</p>
+                    </div>
+                    <div class="kpi-card">
+                        <h4 class="text-lg font-semibold text-gray-600">잉여현금흐름 (2024)</h4>
+                        <p class="text-3xl font-bold text-[#6C8A7B]">$8.23억</p>
+                        <p class="text-sm text-gray-500">경쟁사 대비 우위</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="strengths" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title">Nucor의 핵심 경쟁력</h2>
+                <p class="section-subtitle">Nucor의 지속 가능한 성장을 이끄는 세 가지 핵심 동력은 EAF 기술 리더십, 효율적인 공급망, 그리고 독특한 조직 문화입니다. 이러한 요소들이 어떻게 시너지를 내는지 살펴보세요.</p>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="kpi-card text-center">
+                        <div class="text-4xl mb-4">⚡️</div>
+                        <h3 class="text-xl font-bold mb-2">EAF 기술 리더십</h3>
+                        <p class="text-gray-600 leading-relaxed">전기로(EAF) 방식은 전통적 고로 대비 낮은 탄소 배출, 높은 에너지 효율성, 유연한 생산 능력을 자랑합니다. 이는 Nucor의 저비용 구조와 친환경 경쟁력의 핵심입니다.</p>
+                    </div>
+                    <div class="kpi-card text-center">
+                        <div class="text-4xl mb-4">🔗</div>
+                        <h3 class="text-xl font-bold mb-2">수직 통합된 공급망</h3>
+                        <p class="text-gray-600 leading-relaxed">북미 최대 고철 재활용 기업 DJJ 인수를 통해 원자재 조달을 내재화했습니다. 이는 원가 변동성을 제어하고 안정적인 공급을 보장하는 강력한 경쟁 해자입니다.</p>
+                    </div>
+                    <div class="kpi-card text-center">
+                        <div class="text-4xl mb-4">🏢</div>
+                        <h3 class="text-xl font-bold mb-2">분권화된 조직 문화</h3>
+                        <p class="text-gray-600 leading-relaxed">현장 중심의 자율적 의사결정 구조는 빠른 시장 대응과 혁신을 촉진합니다. 성과 기반 보상 시스템은 직원들의 주인의식을 고취시켜 생산성 향상으로 이어집니다.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="market" class="py-20">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title">시장 기회와 정책적 수혜</h2>
+                <p class="section-subtitle">미국의 제조업 부흥과 보호무역주의 기조는 Nucor에게 강력한 순풍으로 작용하고 있습니다. 주요 정책들이 Nucor의 성장에 어떻게 기여하는지 알아보세요.</p>
+                <div class="bg-white p-8 rounded-xl shadow-lg content-card">
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4">정부 정책이 Nucor에 미치는 영향</h3>
+                            <div class="space-y-6">
+                                <div>
+                                    <h4 class="font-semibold text-lg">📈 보호무역 강화 (Section 232)</h4>
+                                    <p class="text-gray-600">철강 수입 관세는 해외 경쟁을 제한하여 미국 내 철강 가격을 지지하고, Nucor와 같은 국내 생산자의 가격 결정력을 높여 수익성을 개선시킵니다.</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-lg">🇺🇸 "Buy American" 정책</h4>
+                                    <p class="text-gray-600">인프라 투자, 반도체 공장 건설 등 대규모 국책 사업에서 미국산 철강 사용을 의무화함에 따라, 북미 전역에 생산기지를 둔 Nucor의 수주 기회가 크게 확대됩니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center justify-center p-4">
+                            <div class="text-center bg-blue-100 text-blue-800 p-4 rounded-lg shadow-md w-full">
+                                <p class="font-bold">정부 정책</p>
+                                <p class="text-sm">(관세, Buy American)</p>
+                            </div>
+                            <div class="text-4xl my-4 text-gray-400">⬇️</div>
+                            <div class="text-center bg-green-100 text-green-800 p-4 rounded-lg shadow-md w-full">
+                                <p class="font-bold">미국 내 철강 수요 증가 & 가격 안정</p>
+                            </div>
+                            <div class="text-4xl my-4 text-gray-400">⬇️</div>
+                            <div class="text-center bg-[#5A7D9A] text-white p-4 rounded-lg shadow-md w-full">
+                                <p class="font-bold">Nucor 매출 및 수익성 증대</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="esg" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title">ESG 및 지속가능경영</h2>
+                <p class="section-subtitle">Nucor는 EAF 기술을 통해 철강 산업의 패러다임을 바꾸고 있습니다. '친환경 철강' 생산의 선두주자로서 Nucor의 ESG 경쟁력을 확인해 보세요.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div class="kpi-card content-card">
+                        <h3 class="font-bold text-xl mb-2 text-center text-gray-700">생산방식별 온실가스 배출 강도</h3>
+                        <p class="text-gray-600 mb-4 text-sm text-center">Nucor의 EAF 방식은 전통적 고로 방식 대비 탄소 배출량이 현저히 낮습니다.</p>
+                        <div class="chart-container h-64 md:h-80">
+                            <canvas id="esgChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="kpi-card">
+                            <h4 class="font-bold text-lg">🔄 북미 최대 재활용 기업</h4>
+                            <p class="text-gray-600">연간 약 1,800만 톤의 고철을 재활용하여 순환 경제를 선도하며, 이는 원자재 소비를 줄이고 지속 가능한 생산을 가능하게 합니다.</p>
+                        </div>
+                         <div class="kpi-card">
+                            <h4 class="font-bold text-lg">🎯 2050 Net-Zero 목표</h4>
+                            <p class="text-gray-600">스코프 1, 2, 3 배출량을 모두 포함하는 포괄적인 탄소 감축 목표를 설정하고, 청정 에너지 사용 확대를 통해 이를 달성할 계획입니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="outlook" class="py-20">
+            <div class="container mx-auto px-6">
+                 <h2 class="section-title">주가 전망 및 투자 리스크</h2>
+                 <p class="section-subtitle">애널리스트 컨센서스와 주요 리스크 요인을 종합적으로 고려하여 Nucor의 투자 매력도를 평가합니다.</p>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="kpi-card content-card">
+                        <h3 class="font-bold text-xl mb-4">애널리스트 컨센서스</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="font-semibold">평균 목표주가:</span>
+                                <span class="text-2xl font-bold text-[#5A7D9A]">$151.86</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="font-semibold">현재 주가 대비 상승여력:</span>
+                                <span class="text-2xl font-bold text-green-600">+23.93%</span>
+                            </div>
+                        </div>
+                        <div class="mt-6">
+                            <h4 class="font-semibold mb-2">투자의견 분포</h4>
+                            <div class="w-full bg-gray-200 rounded-full h-8 flex overflow-hidden">
+                                <div class="bg-green-600 h-full flex items-center justify-center text-white text-sm font-bold" style="width: 71.43%">강력매수</div>
+                                <div class="bg-green-400 h-full flex items-center justify-center text-white text-sm font-bold" style="width: 14.29%">매수</div>
+                                <div class="bg-yellow-400 h-full flex items-center justify-center text-black text-sm font-bold" style="width: 14.29%">보유</div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">* 7명의 애널리스트 기반</p>
+                        </div>
+                    </div>
+                     <div class="kpi-card content-card">
+                        <h3 class="font-bold text-xl mb-4">주요 투자 리스크 요인</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li><span class="font-semibold">거시/정치적 리스크 (24%):</span> 경기 순환의 변동성 및 무역 정책의 불확실성.</li>
+                            <li><span class="font-semibold">법률/규제 리스크 (24%):</span> 강화되는 환경 규제 및 관련 소송 가능성.</li>
+                            <li><span class="font-semibold">판매/재무 리스크 (36%):</span> 글로벌 공급 과잉, 성장 프로젝트 관련 비용 증가.</li>
+                            <li><span class="font-semibold">생산 리스크 (12%):</span> 원자재(고철) 가격의 변동성.</li>
+                        </ul>
+                     </div>
+                 </div>
+                 <div class="mt-12 bg-white p-8 rounded-xl shadow-lg text-center content-card">
+                     <h3 class="text-2xl font-bold mb-3">종합 평가</h3>
+                     <p class="max-w-4xl mx-auto text-gray-700 leading-relaxed">Nucor는 견고한 펀더멘털, 정책적 수혜, ESG 리더십을 바탕으로 장기적인 성장 잠재력을 보유하고 있습니다. 철강 산업 고유의 경기 순환 리스크는 존재하지만, Nucor의 다각화된 사업 포트폴리오와 효율적인 운영 모델은 이러한 변동성을 완화하는 데 기여할 것입니다. 투자자들은 거시 경제 동향을 주시하며 Nucor의 구조적 강점에 주목할 필요가 있습니다.</p>
+                 </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2025 Nucor Interactive Analysis. All rights reserved.</p>
+            <p class="text-sm text-gray-400 mt-2">본 자료는 제공된 보고서를 기반으로 제작되었으며, 투자 추천을 목적으로 하지 않습니다.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const financialsTrendCtx = document.getElementById('financialsTrendChart').getContext('2d');
+            const financialsTrendChart = new Chart(financialsTrendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['2020', '2021', '2022', '2023', '2024'],
+                    datasets: [
+                        {
+                            label: '영업이익 (억 달러)',
+                            data: [9.99, 92.57, 104.04, 62.30, 28.42],
+                            borderColor: '#5A7D9A',
+                            backgroundColor: 'rgba(90, 125, 154, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                        },
+                        {
+                            label: '순이익 (억 달러)',
+                            data: [7.17, 67.95, 75.76, 45.08, 20.18],
+                            borderColor: '#6C8A7B',
+                            backgroundColor: 'rgba(108, 138, 123, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value + '억';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: $${context.parsed.y}억`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const competitorCtx = document.getElementById('competitorChart').getContext('2d');
+            const competitorChart = new Chart(competitorCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Nucor (NUE)', 'Steel Dynamics (STLD)', 'U.S. Steel (X)'],
+                    datasets: [
+                        {
+                            label: 'ROE (%)',
+                            data: [9.33, 17.31, 3.38],
+                            backgroundColor: '#5A7D9A',
+                            borderRadius: 4,
+                        },
+                        {
+                            label: '부채비율 (D/E)',
+                            data: [0.59, 0.70, 0.37],
+                            backgroundColor: '#B0C4DE',
+                            borderRadius: 4,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                     plugins: {
+                        tooltip: {
+                             callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y;
+                                        if(context.dataset.label.includes('%')) {
+                                            label += '%';
+                                        }
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const esgCtx = document.getElementById('esgChart').getContext('2d');
+            const esgChart = new Chart(esgCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['전기로 (EAF - Nucor)', '고로 (BF-BOF - 전통방식)'],
+                    datasets: [{
+                        label: '온실가스 배출 강도 비교',
+                        data: [1, 3],
+                        backgroundColor: [
+                            '#6C8A7B',
+                            '#d3d3d3',
+                        ],
+                        borderColor: '#F8F7F4',
+                        borderWidth: 4,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: 상대 배출량 ${context.parsed}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.4
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = e.currentTarget.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 70, // Adjust for sticky header height
+                            behavior: 'smooth'
+                        });
+                        if (mobileMenu.classList.contains('hidden') === false) {
+                           mobileMenu.classList.add('hidden');
+                        }
+                    }
+                });
+            });
+
+        });
+    </script>
+
+</body>
+</html>

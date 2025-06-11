@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LS 네트웍스 & LS 에코에너지 대화형 분석</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: The SPA is designed with a top-down, comparative structure. It starts with a high-level "At a Glance" comparison to provide immediate key takeaways. Users can then scroll down into dedicated "Deep Dive" sections for each company, followed by an analysis of the government's policies that provide context. This non-linear, thematic structure allows users to either get a quick overview or explore specific areas of interest, which is more user-friendly than the linear format of the source report. The primary interaction is scrolling, with tabs and clickable elements within sections to reveal detailed data, encouraging exploration without overwhelming the user. -->
+    <!-- Visualization & Content Choices: 
+        - Goal: Compare Companies -> Method: Side-by-side card layout (HTML/Tailwind) -> Interaction: Visual scan -> Justification: Quick, high-level understanding of core differences.
+        - Goal: Show Financial Trends -> Method: Line/Bar charts (Chart.js) -> Interaction: Tooltips on hover -> Justification: Clearly visualizes performance over time and complex data like the LS Networks debt ratio anomaly.
+        - Goal: Explain Business Segments -> Method: Doughnut chart (Chart.js) and interactive info cards (HTML/JS) -> Interaction: Hover/Click to reveal details -> Justification: Breaks down revenue sources and growth drivers in an engaging way.
+        - Goal: Detail Government Policies -> Method: Tabbed interface (JS) -> Interaction: Click to switch content -> Justification: Organizes complex policy information into digestible, thematic chunks.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        .tab-btn.active { border-color: #1E40AF; color: #1E40AF; background-color: #DBEAFE; }
+        .tab-btn { transition: all 0.3s ease; }
+        .kpi-card { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; }
+        .kpi-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+    </style>
+</head>
+<body class="bg-stone-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-2">LS 그룹 계열사, 새 정부 정책 속 기회와 도전</h1>
+            <p class="text-lg text-gray-600">LS네트웍스와 LS에코에너지, 이재명 정부의 정책 방향에 따른 주가 영향 심층 분석</p>
+        </header>
+
+        <main>
+            <section id="comparison" class="mb-16">
+                <h2 class="text-3xl font-bold text-center mb-8">핵심 비교: LS네트웍스 vs LS에코에너지</h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-2xl font-bold mb-4 text-blue-800">LS 네트웍스</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-semibold text-lg">사업 포트폴리오</h4>
+                                <p class="text-gray-700">내수 중심의 유통(45%) 및 브랜드(43%, 프로스펙스) 사업. 다각화되었으나 경기 변동에 민감.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-lg">재무 건전성</h4>
+                                <p class="text-gray-700">본업은 안정적이나, <strong class="text-red-600">LS증권 연결로 부채비율 급등 (990%)</strong>. 투자자 오해 소지 있음.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-lg">정부 정책 시너지</h4>
+                                <p class="text-gray-700">내수 부양책, 주식시장 활성화 등 <strong class="text-amber-600">간접적 수혜</strong> 기대. 직접적 연관성은 낮음.</p>
+                            </div>
+                             <div>
+                                <h4 class="font-semibold text-lg">투자 전망</h4>
+                                <p class="text-gray-700">본업 수익성 개선이 주가 상승의 핵심. 정책 모멘텀은 제한적.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border-2 border-green-600">
+                        <h3 class="text-2xl font-bold mb-4 text-green-700">LS 에코에너지</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-semibold text-lg">사업 포트폴리오</h4>
+                                <p class="text-gray-700">베트남 1위 전선 기업. 초고압/해저케이블 등 고부가가치 제품 및 신사업(희토류)에 집중.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-lg">재무 건전성</h4>
+                                <p class="text-gray-700">견고한 실적 성장, 영업이익 급증. <strong class="text-green-600">극히 낮은 부채비율 (2.58%)</strong>로 안정성 탁월.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-lg">정부 정책 시너지</h4>
+                                <p class="text-gray-700">재생에너지 전환, 에너지 고속도로 등 <strong class="text-green-600">핵심 정책의 직접적 수혜주</strong>.</p>
+                            </div>
+                             <div>
+                                <h4 class="font-semibold text-lg">투자 전망</h4>
+                                <p class="text-gray-700">강력한 펀더멘털과 정책 모멘텀이 결합되어 주가 상승 기대감 높음.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold">기업별 심층 분석</h2>
+                <p class="text-gray-600 mt-2">탭을 클릭하여 각 기업의 상세 분석을 확인하세요.</p>
+                <div class="mt-4 border-b border-gray-200">
+                    <nav class="-mb-px flex justify-center space-x-4 md:space-x-8" aria-label="Tabs">
+                        <button onclick="changeTab('ls-networks')" class="company-tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg border-blue-600 text-blue-600">LS 네트웍스</button>
+                        <button onclick="changeTab('ls-ecoenergy')" class="company-tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">LS 에코에너지</button>
+                    </nav>
+                </div>
+            </div>
+
+            <section id="ls-networks" class="company-tab-content">
+                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg mb-12">
+                     <p class="mb-8 text-gray-700 text-lg leading-relaxed">LS네트웍스는 프로스펙스 브랜드를 중심으로 한 내수 소비재 사업과 중장비 유통 사업을 영위합니다. 정부의 내수 활성화 정책은 간접적인 긍정적 효과를 줄 수 있으나, 주가 향방은 결국 본업의 경쟁력과 수익성 개선에 달려있습니다. 특히 연결 재무제표의 부채비율은 금융 자회사인 LS증권의 특성으로 인한 것으로, 기업 본질 가치와는 분리하여 분석해야 합니다.</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-bold mb-4">사업 구조: 매출 비중</h3>
+                            <div class="chart-container h-[250px] md:h-[300px]"><canvas id="lsnBusinessChart"></canvas></div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-4">핵심 재무 지표: 연결 vs 별도 부채비율</h3>
+                             <p class="text-sm text-gray-600 mb-2">연결 부채비율 급증은 LS증권 편입에 따른 회계상 효과로, LS네트웍스 본업의 재무 리스크와는 무관합니다.</p>
+                            <div class="chart-container h-[250px] md:h-[300px]"><canvas id="lsnDebtChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ls-ecoenergy" class="company-tab-content hidden">
+                 <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg mb-12">
+                     <p class="mb-8 text-gray-700 text-lg leading-relaxed">LS에코에너지는 베트남 1위 전선 기업이자, 정부의 재생에너지 및 전력 인프라 확장 정책의 핵심 수혜주로 평가됩니다. 초고압·해저 케이블 등 고부가가치 제품과 희토류 등 신사업을 통해 강력한 성장 모멘텀을 확보했으며, 매우 안정적인 재무구조를 바탕으로 정책 수혜를 온전히 실적으로 연결할 가능성이 높습니다. 시장의 기대감 또한 주가에 긍정적으로 작용하고 있습니다.</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-bold mb-4">분기별 실적 추이 (억 원)</h3>
+                            <div class="chart-container h-[300px] md:h-[350px]"><canvas id="lsePerformanceChart"></canvas></div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-4">신성장 동력</h3>
+                            <div class="space-y-4 mt-4">
+                                <div class="p-4 bg-gray-100 rounded-lg">
+                                    <h4 class="font-bold">🌍 해저케이블</h4>
+                                    <p class="text-sm text-gray-600">해상풍력 발전의 필수 인프라. 에너지 고속도로 등 정부 정책과 직접 연계.</p>
+                                </div>
+                                <div class="p-4 bg-gray-100 rounded-lg">
+                                    <h4 class="font-bold">💎 희토류 사업</h4>
+                                    <p class="text-sm text-gray-600">첨단 산업의 비타민. 공급망 다변화의 핵심으로 장기 성장성 확보.</p>
+                                </div>
+                                 <div class="p-4 bg-gray-100 rounded-lg">
+                                    <h4 class="font-bold">📡 고부가 통신선 (UTP)</h4>
+                                    <p class="text-sm text-gray-600">AI 데이터센터 등 수요 증가로 북미 수출 확대. 수익성 개선 견인.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="policy" class="my-16">
+                <h2 class="text-3xl font-bold text-center mb-2">이재명 정부 핵심 경제 정책 분석</h2>
+                <p class="text-center text-gray-600 mb-8">주요 정책이 각 기업에 미치는 영향을 확인하세요.</p>
+                <div class="max-w-4xl mx-auto">
+                    <div class="mb-4 flex border-b border-gray-200">
+                        <button class="tab-btn active flex-1 text-center p-3 font-semibold border-b-2" onclick="openPolicyTab(event, 'p1')">재생에너지 & 인프라</button>
+                        <button class="tab-btn flex-1 text-center p-3 font-semibold border-b-2" onclick="openPolicyTab(event, 'p2')">주식시장 활성화</button>
+                        <button class="tab-btn flex-1 text-center p-3 font-semibold border-b-2" onclick="openPolicyTab(event, 'p3')">내수 부양</button>
+                    </div>
+
+                    <div id="p1" class="policy-content bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold mb-2">에너지 전환 및 인프라 투자</h3>
+                        <p class="text-gray-700 mb-4">재생에너지 중심 에너지믹스 전환, '에너지 고속도로' 건설 등 대규모 국책 사업 추진. 전력망 고도화에 필수적인 초고압/해저케이블 수요 급증 예상.</p>
+                        <div class="p-4 rounded-lg bg-green-50 border border-green-200">
+                            <strong class="text-green-700">주요 수혜 기업: LS 에코에너지</strong>
+                            <p class="text-sm text-gray-600">초고압 케이블 기술력과 베트남 시장 지위를 바탕으로 프로젝트 수주 및 매출 성장의 직접적이고 가장 큰 수혜가 기대됨.</p>
+                        </div>
+                    </div>
+                    <div id="p2" class="policy-content bg-white p-6 rounded-lg shadow-md hidden">
+                         <h3 class="text-xl font-bold mb-2">'코리아 디스카운트' 해소</h3>
+                        <p class="text-gray-700 mb-4">상법 개정(주주 충실 의무), 자사주 소각 의무화 등 기업 지배구조 개선을 통해 주주가치 제고. 시장 전반의 투자 심리 개선 효과.</p>
+                        <div class="p-4 rounded-lg bg-blue-50 border border-blue-200 mb-2">
+                            <strong class="text-blue-700">영향 기업: LS 네트웍스</strong>
+                             <p class="text-sm text-gray-600">장기간 무배당 정책을 지속해 온 만큼, 주주환원 정책 강화 압박으로 작용. 배당 재개 등 주주친화 정책 발표 시 주가에 긍정적.</p>
+                        </div>
+                         <div class="p-4 rounded-lg bg-green-50 border border-green-200">
+                            <strong class="text-green-700">영향 기업: LS 에코에너지</strong>
+                             <p class="text-sm text-gray-600">펀더멘털이 우수하여 시장 활성화 시 외국인 및 기관 투자자금 유입 확대 기대.</p>
+                        </div>
+                    </div>
+                    <div id="p3" class="policy-content bg-white p-6 rounded-lg shadow-md hidden">
+                         <h3 class="text-xl font-bold mb-2">대규모 추경을 통한 내수 경기 부양</h3>
+                        <p class="text-gray-700 mb-4">최대 50조 원 규모의 추경 편성을 통해 소비 심리를 개선하고 내수 경제 활성화 목표. 가계 소득 증대 및 소비 촉진 효과.</p>
+                        <div class="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                            <strong class="text-blue-700">주요 수혜 기업: LS 네트웍스</strong>
+                            <p class="text-sm text-gray-600">매출의 95%가 내수에서 발생. 소비 심리 회복 시 주력 사업인 프로스펙스 등 소비재 판매 증가로 이어져 간접 수혜 예상.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="conclusion" class="text-center bg-gray-800 text-white p-8 md:p-12 rounded-2xl">
+                <h2 class="text-3xl font-bold mb-4">결론: 상반된 기회, 현명한 선택은?</h2>
+                <div class="max-w-4xl mx-auto text-left grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-xl font-bold text-blue-300 mb-2">LS 네트웍스: 간접 수혜, 본질 가치에 주목</h3>
+                        <p>내수 활성화 정책의 간접적인 온기를 기대할 수 있으나, 주가 상승은 본업의 경쟁력 회복과 수익성 개선 여부에 달려 있습니다. 연결 부채비율과 같은 회계적 착시를 걷어내고 기업의 본질적인 펀더멘털을 평가하는 것이 중요합니다.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-green-300 mb-2">LS 에코에너지: 정책의 날개를 달다</h3>
+                        <p>정부의 핵심 에너지 정책과 완벽하게 부합하며 직접적이고 강력한 수혜가 예상됩니다. 견고한 재무구조와 신성장 동력은 정책 모멘텀을 실제 이익 성장으로 이끌 가능성을 높이며, 투자 매력도가 매우 높은 것으로 판단됩니다.</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        const companyTabs = {
+            'ls-networks': document.getElementById('ls-networks'),
+            'ls-ecoenergy': document.getElementById('ls-ecoenergy'),
+        };
+        const companyTabButtons = document.querySelectorAll('.company-tab-btn');
+
+        function changeTab(tabName) {
+            Object.values(companyTabs).forEach(tab => tab.classList.add('hidden'));
+            companyTabs[tabName].classList.remove('hidden');
+
+            companyTabButtons.forEach(button => {
+                button.classList.remove('border-blue-600', 'text-blue-600');
+                button.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            });
+            const activeButton = document.querySelector(`button[onclick="changeTab('${tabName}')"]`);
+            activeButton.classList.add('border-blue-600', 'text-blue-600');
+            activeButton.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+        }
+
+        function openPolicyTab(evt, tabName) {
+            const policyContents = document.getElementsByClassName("policy-content");
+            for (let i = 0; i < policyContents.length; i++) {
+                policyContents[i].classList.add("hidden");
+            }
+
+            const tabBtns = document.getElementsByClassName("tab-btn");
+            for (let i = 0; i < tabBtns.length; i++) {
+                tabBtns[i].classList.remove("active");
+            }
+            
+            document.getElementById(tabName).classList.remove("hidden");
+            evt.currentTarget.classList.add("active");
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const lsnBusinessCtx = document.getElementById('lsnBusinessChart').getContext('2d');
+            new Chart(lsnBusinessCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['유통사업', '브랜드사업', '기타'],
+                    datasets: [{
+                        label: '매출 비중',
+                        data: [45, 43, 12],
+                        backgroundColor: ['#3B82F6', '#1D4ED8', '#BFDBFE'],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: false, text: 'LS네트웍스 매출 구성' }
+                    }
+                }
+            });
+
+            const lsnDebtCtx = document.getElementById('lsnDebtChart').getContext('2d');
+            new Chart(lsnDebtCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['2023/12', '2024/12', '2025/03'],
+                    datasets: [
+                        {
+                            label: '연결 부채비율 (%)',
+                            data: [132.13, 931.50, 990.30],
+                            backgroundColor: '#EF4444',
+                            borderColor: '#B91C1C',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '별도 부채비율 (%)',
+                            data: [132.3, 140.0, 145.0],
+                            backgroundColor: '#22C55E',
+                            borderColor: '#15803D',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, ticks: { callback: value => value + '%' } } },
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${context.raw.toFixed(2)}%` } }
+                    }
+                }
+            });
+            
+            const lsePerformanceCtx = document.getElementById('lsePerformanceChart').getContext('2d');
+            new Chart(lsePerformanceCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['2024 2Q', '2024 3Q', '2024 4Q', '2025 1Q'],
+                    datasets: [
+                        {
+                            label: '매출액',
+                            data: [2326, 2234, 2331, 2283],
+                            backgroundColor: '#89582e',
+                            yAxisID: 'y',
+                        },
+                        {
+                            label: '영업이익',
+                            data: [147, 126, 78, 153],
+                            backgroundColor: '#65A30D',
+                            yAxisID: 'y1',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    stacked: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: '매출액 (억 원)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: '영업이익 (억 원)' },
+                            grid: { drawOnChartArea: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top' },
+                    }
+                }
+            });
+            
+            changeTab('ls-networks');
+        });
+    </script>
+</body>
+</html>

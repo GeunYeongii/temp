@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>할리버튼(HAL) 대화형 기업 분석 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Off-white, Dark Gray, Muted Teal) -->
+    <!-- Application Structure Plan: The application is designed as an interactive, single-page dashboard. This structure diverges from the linear format of the source report to enhance usability and exploration. It uses a sticky top navigation to allow users to jump between thematic sections: Overview, Financials, Market/Competition, and Outlook/Risks. This non-linear approach empowers users to access the information they find most relevant first. Interactive charts and clickable elements are used to present complex data in a digestible format, encouraging user engagement and deeper understanding of Halliburton's strategic position. This dashboard architecture is superior to a simple document translation as it transforms passive reading into an active analytical experience. -->
+    <!-- Visualization & Content Choices: 
+        - Company Overview: Goal: Inform/Organize -> Viz: Donut Chart for business segment revenue, Cards for key stats, HTML/CSS diagram for business structure -> Interaction: Hover on chart -> Justification: Provides a quick, high-level summary of the company's structure and scale.
+        - Financial Trends: Goal: Show Change -> Viz: Line Chart (Chart.js) for revenue/profit over 5 years -> Interaction: Hover for tooltips -> Justification: Clearly visualizes performance trends over time.
+        - Competitor Comparison: Goal: Compare -> Viz: Grouped Bar Chart (Chart.js) -> Interaction: Hover for tooltips -> Justification: Enables direct, at-a-glance comparison of HAL against SLB and BKR on key financial metrics.
+        - Market Analysis: Goal: Organize/Inform -> Viz: HTML/CSS Flexbox diagram for value chain, Cards for industry trends -> Interaction: Static -> Justification: Simplifies complex concepts like the industry value chain and makes trends easily scannable.
+        - Stock Outlook: Goal: Inform -> Viz: Donut chart for analyst ratings, simple data display for price targets -> Interaction: Hover on chart -> Justification: Quickly summarizes market sentiment and key price points.
+        - Risks/Opportunities: Goal: Compare/Organize -> Viz: Two-column layout with icons -> Interaction: Static -> Justification: Presents a balanced view of positive and negative factors in a highly readable format.
+        - All libraries/methods (Chart.js, HTML/CSS) were chosen to avoid SVG/Mermaid as required. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            max-height: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+                max-width: 800px;
+            }
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover {
+            color: #0d9488;
+        }
+        .nav-link.active {
+            color: #0d9488;
+            border-bottom: 2px solid #0d9488;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-gray-800">
+
+    <header class="bg-white/80 backdrop-blur-lg shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="font-bold text-xl text-teal-700">HAL</span>
+                    <span class="ml-3 text-lg font-semibold text-gray-700">할리버튼 기업 분석 대시보드</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#overview" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">기업 개요</a>
+                        <a href="#financials" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">재무 성과</a>
+                        <a href="#market" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">시장 및 경쟁</a>
+                        <a href="#stock" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">주가 및 전망</a>
+                        <a href="#outlook" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">종합 전망</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="bg-white border border-gray-300 rounded-md py-2 px-3 text-sm">
+                        <option value="#overview">기업 개요</option>
+                        <option value="#financials">재무 성과</option>
+                        <option value="#market">시장 및 경쟁</option>
+                        <option value="#stock">주가 및 전망</option>
+                        <option value="#outlook">종합 전망</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+
+        <section id="overview" class="py-12">
+            <h2 class="text-3xl font-bold mb-2 text-gray-900">1. 기업 개요: 에너지 산업의 글로벌 리더</h2>
+            <p class="text-lg text-gray-600 mb-8">1919년 설립된 할리버튼은 유전 서비스(OFS) 산업의 핵심 기업입니다. 이 섹션에서는 할리버튼의 핵심 비즈니스 구조와 글로벌 현황을 살펴봅니다.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div class="card p-6 text-center">
+                    <div class="text-4xl mb-2">📜</div>
+                    <h3 class="text-lg font-semibold mb-1">설립 연도</h3>
+                    <p class="text-3xl font-bold text-teal-600">1919년</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <div class="text-4xl mb-2">🌍</div>
+                    <h3 class="text-lg font-semibold mb-1">글로벌 사업</h3>
+                    <p class="text-3xl font-bold text-teal-600">70+ 개국</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <div class="text-4xl mb-2">👥</div>
+                    <h3 class="text-lg font-semibold mb-1">직원 수</h3>
+                    <p class="text-3xl font-bold text-teal-600">약 48,000명</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                <div class="lg:col-span-3 card p-6">
+                    <h3 class="text-xl font-bold mb-4">핵심 사업 부문</h3>
+                    <p class="text-gray-600 mb-6">할리버튼의 사업은 크게 '완료 및 생산'과 '시추 및 평가' 두 부문으로 나뉩니다. 각 부문은 유정의 수명주기 전반에 걸쳐 필수적인 기술과 서비스를 제공하며 상호보완적으로 작용합니다.</p>
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between items-baseline mb-1">
+                                <h4 class="font-semibold text-teal-700">완료 및 생산 (Completion and Production)</h4>
+                                <span class="text-sm font-medium text-gray-500">매출 비중 57.8%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-teal-600 h-2.5 rounded-full" style="width: 57.8%"></div>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2">수압 파쇄, 시멘팅 등 유정의 생산성 극대화에 중점을 둔 서비스</p>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-baseline mb-1">
+                                <h4 class="font-semibold text-orange-700">시추 및 평가 (Drilling and Evaluation)</h4>
+                                <span class="text-sm font-medium text-gray-500">매출 비중 42.2%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-orange-500 h-2.5 rounded-full" style="width: 42.2%"></div>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2">유정 건설, 저수지 특성 분석 등 탐사 및 개발 단계 서비스</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-2 card p-6 flex flex-col items-center justify-center">
+                    <h3 class="text-xl font-bold mb-4">사업부별 매출 비중 (2024)</h3>
+                    <div class="w-full max-w-[300px] mx-auto">
+                        <canvas id="revenueBySegmentChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="financials" class="py-12">
+            <h2 class="text-3xl font-bold mb-2 text-gray-900">2. 재무 성과: 회복과 성장</h2>
+            <p class="text-lg text-gray-600 mb-8">최근 5년간 할리버튼의 재무 성과 추이를 분석합니다. 팬데믹 이후의 회복력과 경쟁사 대비 재무 상태를 시각적으로 확인하세요.</p>
+            
+            <div class="card p-6 mb-8">
+                <h3 class="text-xl font-bold mb-4">주요 재무 지표 추이 (2020-2024)</h3>
+                <div class="chart-container">
+                    <canvas id="financialsTrendChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                 <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4">수익성 및 재무 건전성</h3>
+                    <div class="chart-container h-[350px] md:h-[400px]">
+                        <canvas id="profitabilityDebtChart"></canvas>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4">경쟁사 재무 비교 (2024)</h3>
+                    <div class="chart-container h-[350px] md:h-[400px]">
+                        <canvas id="competitorChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="market" class="py-12">
+            <h2 class="text-3xl font-bold mb-2 text-gray-900">3. 시장 및 경쟁: 기술 중심의 리더십</h2>
+            <p class="text-lg text-gray-600 mb-8">유전 서비스 산업의 구조와 최신 기술 트렌드를 이해하고, 경쟁 환경 속 할리버튼의 독보적인 위치를 분석합니다.</p>
+            
+            <div class="card p-6 mb-8">
+                <h3 class="text-xl font-bold mb-4">오일필드 서비스(OFS) 산업 가치사슬</h3>
+                <div class="flex flex-col md:flex-row justify-around items-center text-center space-y-4 md:space-y-0 md:space-x-4">
+                    <div class="p-4 rounded-lg flex-1">
+                        <h4 class="font-bold text-lg">업스트림 (탐사/생산)</h4>
+                        <p class="text-sm text-gray-600">원유/가스 탐사, 시추, 생산</p>
+                        <div class="mt-2 text-teal-600 font-bold border-2 border-teal-500 rounded-lg p-2">할리버튼 핵심 영역</div>
+                    </div>
+                    <div class="text-2xl text-gray-400 font-mono hidden md:block">&gt;&gt;</div>
+                    <div class="p-4 rounded-lg flex-1">
+                        <h4 class="font-bold text-lg">미드스트림 (운송/저장)</h4>
+                        <p class="text-sm text-gray-600">파이프라인, 유조선, 저장시설</p>
+                    </div>
+                     <div class="text-2xl text-gray-400 font-mono hidden md:block">&gt;&gt;</div>
+                    <div class="p-4 rounded-lg flex-1">
+                        <h4 class="font-bold text-lg">다운스트림 (정제/판매)</h4>
+                        <p class="text-sm text-gray-600">정유, 석유화학, 소매 유통</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                 <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4">경쟁 우위: 북미 시장 지배력</h3>
+                    <div class="text-4xl mb-3"> fracking-tower </div>
+                    <p class="text-gray-600">북미 수압 파쇄(Fracking) 및 완료 시장의 최대 사업자로서, 관련 시장 매출이 전체의 거의 절반을 차지합니다. 이는 유가 상승 시 빠른 실적 개선으로 이어질 수 있는 강점입니다.</p>
+                </div>
+                 <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4">기술력: 압도적인 특허 포트폴리오</h3>
+                     <div class="text-4xl mb-3">💡</div>
+                    <p class="text-gray-600 mb-4">에너지 서비스 부문 전체 지적 재산의 67%에 해당하는 3,247개의 특허를 보유하여, 경쟁사인 슐룸베르거(589개)와 베이커휴즈(412개)를 압도합니다.</p>
+                </div>
+                 <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4">디지털 전환 선도</h3>
+                     <div class="text-4xl mb-3">⚙️</div>
+                    <p class="text-gray-600">AI, IoT, 자동화 등 디지털 솔루션을 통해 탐사 기술의 운영 효율성을 15-20% 향상시키며, 연간 27억 달러 이상의 관련 매출을 창출하고 있습니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="stock" class="py-12">
+            <h2 class="text-3xl font-bold mb-2 text-gray-900">4. 주가 분석 및 전망</h2>
+            <p class="text-lg text-gray-600 mb-8">기관 투자가들의 평가와 목표 주가를 살펴보고, 향후 할리버튼의 주가에 영향을 미칠 주요 변수들을 분석합니다.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="card p-6">
+                     <h3 class="text-xl font-bold mb-4 text-center">기관 투자가 컨센서스</h3>
+                     <div class="chart-container h-[300px] max-w-[300px]">
+                        <canvas id="analystRatingsChart"></canvas>
+                    </div>
+                </div>
+                <div class="card p-6 flex flex-col justify-center">
+                    <h3 class="text-xl font-bold mb-4">목표 주가 (12개월)</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center bg-green-100 p-3 rounded-lg">
+                            <span class="font-semibold text-green-800">최고 목표가</span>
+                            <span class="font-bold text-2xl text-green-800">$56.00</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-blue-100 p-3 rounded-lg">
+                            <span class="font-semibold text-blue-800">평균 목표가</span>
+                            <span class="font-bold text-2xl text-blue-800">$42.53</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-red-100 p-3 rounded-lg">
+                            <span class="font-semibold text-red-800">최저 목표가</span>
+                            <span class="font-bold text-2xl text-red-800">$22.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="outlook" class="py-12">
+            <h2 class="text-3xl font-bold mb-2 text-gray-900">5. 종합 전망 및 리스크</h2>
+            <p class="text-lg text-gray-600 mb-8">할리버튼의 미래 성장성과 산업 내 기회 요인, 그리고 잠재적인 리스크 요인을 종합적으로 평가합니다.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4 text-green-700 flex items-center"><span class="text-2xl mr-2">📈</span>기회 요인</h3>
+                    <ul class="space-y-3 list-disc list-inside text-gray-700">
+                        <li><b>글로벌 에너지 수요 증가:</b> 개발도상국 중심의 꾸준한 에너지 수요가 핵심 사업의 성장을 지지합니다.</li>
+                        <li><b>기술 혁신 리더십:</b> AI, 자동화 등 디지털 기술을 통한 운영 효율성 증대는 지속적인 경쟁 우위를 제공합니다.</li>
+                        <li><b>신에너지 시장 진출:</b> 탄소 포집, 지열 등 기존 전문성을 활용할 수 있는 신규 시장으로의 확장 잠재력이 있습니다.</li>
+                         <li><b>견고한 재무구조:</b> 지속적인 부채 감소와 높은 수익성은 미래 투자와 위기 대응 능력을 강화합니다.</li>
+                    </ul>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4 text-red-700 flex items-center"><span class="text-2xl mr-2">⚠️</span>리스크 요인</h3>
+                     <ul class="space-y-3 list-disc list-inside text-gray-700">
+                        <li><b>유가 변동성:</b> 실적과 주가가 유가에 민감하게 반응하여, 유가 하락 시 리스크가 증대됩니다.</li>
+                        <li><b>지정학적 리스크:</b> 주요 산유국의 정치적 불안 및 무역 갈등은 운영 환경에 불확실성을 더합니다.</li>
+                        <li><b>에너지 전환 가속화:</b> 예상보다 빠른 재생에너지로의 전환은 장기적으로 화석연료 서비스 수요를 위축시킬 수 있습니다.</li>
+                        <li><b>강화되는 ESG 규제:</b> 환경 규제 강화는 추가적인 비용 부담 및 운영상의 제약으로 작용할 수 있습니다.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto py-4 px-6 text-center text-sm">
+            <p>&copy; 2025 할리버튼(HAL) 대화형 기업 분석 대시보드. All rights reserved.</p>
+            <p class="text-gray-400 mt-1">본 자료는 제공된 보고서를 기반으로 생성되었으며, 투자 추천을 목적으로 하지 않습니다.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const financialData = {
+                years: ['2020', '2021', '2022', '2023', '2024'],
+                revenue: [144.5, 153.0, 203.0, 230.2, 229.4],
+                operatingIncome: [-24.4, 18.0, 27.1, 40.8, 38.0],
+                netIncome: [-29.4, 14.6, 15.7, 26.4, 25.0],
+                debtRatio: [3.15, 2.32, 1.92, 1.62, 0.84],
+                roe: [-55.97, 1.61, -2.73, 7.62, 20.25],
+            };
+
+            const competitorData = {
+                companies: ['할리버튼(HAL)', '슐룸베르거(SLB)', '베이커휴즈(BKR)'],
+                revenue: [229.4, 362.9, 278.3],
+                netIncome: [25.0, 44.6, 29.8],
+                roe: [20.25, 21.1, 17.63],
+            };
+
+            const segmentData = {
+                labels: ['완료 및 생산', '시추 및 평가'],
+                data: [57.8, 42.2],
+            };
+
+            const analystData = {
+                labels: ['매수', '중립', '매도'],
+                data: [51, 9, 0],
+            };
+            
+            const commonChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                         labels: {
+                            font: {
+                                family: "'Noto Sans KR', sans-serif",
+                                size: 12,
+                            }
+                        }
+                    },
+                    tooltip: {
+                        bodyFont: {
+                            family: "'Noto Sans KR', sans-serif"
+                        },
+                        titleFont: {
+                             family: "'Noto Sans KR', sans-serif"
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                             font: {
+                                family: "'Noto Sans KR', sans-serif",
+                            }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                         ticks: {
+                             font: {
+                                family: "'Noto Sans KR', sans-serif",
+                            }
+                        },
+                        grid: {
+                            color: '#e5e7eb'
+                        }
+                    }
+                }
+            };
+            
+            const commonPieOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                 plugins: {
+                    legend: {
+                        position: 'bottom',
+                         labels: {
+                            font: {
+                                family: "'Noto Sans KR', sans-serif",
+                                size: 12,
+                            },
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                         callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += context.parsed + '%';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            };
+
+            const ctxRevenueSegment = document.getElementById('revenueBySegmentChart');
+            if(ctxRevenueSegment) {
+                new Chart(ctxRevenueSegment, {
+                    type: 'doughnut',
+                    data: {
+                        labels: segmentData.labels,
+                        datasets: [{
+                            label: '매출 비중',
+                            data: segmentData.data,
+                            backgroundColor: ['#0d9488', '#f97316'],
+                            borderColor: '#f8f9fa',
+                            borderWidth: 4
+                        }]
+                    },
+                    options: commonPieOptions
+                });
+            }
+
+            const ctxFinancialsTrend = document.getElementById('financialsTrendChart');
+            if(ctxFinancialsTrend) {
+                new Chart(ctxFinancialsTrend, {
+                    type: 'bar',
+                    data: {
+                        labels: financialData.years,
+                        datasets: [
+                            {
+                                label: '매출 (억 달러)',
+                                data: financialData.revenue,
+                                backgroundColor: '#14b8a6',
+                                borderColor: '#0f766e',
+                                borderWidth: 1,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: '영업이익 (억 달러)',
+                                data: financialData.operatingIncome,
+                                type: 'line',
+                                borderColor: '#f97316',
+                                backgroundColor: '#f97316',
+                                tension: 0.3,
+                                yAxisID: 'y'
+                            },
+                        ]
+                    },
+                    options: {
+                       ...commonChartOptions,
+                       scales: {
+                            ...commonChartOptions.scales,
+                            y: {
+                                ...commonChartOptions.scales.y,
+                                beginAtZero: true,
+                                title: { display: true, text: '금액 (억 달러)' }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            const ctxProfitabilityDebt = document.getElementById('profitabilityDebtChart');
+            if (ctxProfitabilityDebt) {
+                new Chart(ctxProfitabilityDebt, {
+                    type: 'bar',
+                    data: {
+                        labels: financialData.years,
+                        datasets: [{
+                            label: '부채비율 (배)',
+                            data: financialData.debtRatio,
+                            backgroundColor: '#fbbf24',
+                            yAxisID: 'y_debt',
+                            order: 2
+                        }, {
+                            label: 'ROE (%)',
+                            data: financialData.roe,
+                            borderColor: '#0d9488',
+                            type: 'line',
+                            yAxisID: 'y_roe',
+                            tension: 0.3,
+                            order: 1
+                        }]
+                    },
+                    options: {
+                        ...commonChartOptions,
+                        scales: {
+                           ...commonChartOptions.scales,
+                            y_debt: {
+                                type: 'linear',
+                                position: 'left',
+                                title: { display: true, text: '부채비율 (배)' },
+                                grid: { drawOnChartArea: false }
+                            },
+                            y_roe: {
+                                type: 'linear',
+                                position: 'right',
+                                title: { display: true, text: 'ROE (%)' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const ctxCompetitor = document.getElementById('competitorChart');
+            if (ctxCompetitor) {
+                new Chart(ctxCompetitor, {
+                    type: 'bar',
+                    data: {
+                        labels: ['매출(억$)', '순이익(억$)', 'ROE(%)'],
+                        datasets: [
+                            {
+                                label: competitorData.companies[0],
+                                data: [competitorData.revenue[0], competitorData.netIncome[0], competitorData.roe[0]],
+                                backgroundColor: '#0d9488',
+                            },
+                            {
+                                label: competitorData.companies[1],
+                                data: [competitorData.revenue[1], competitorData.netIncome[1], competitorData.roe[1]],
+                                backgroundColor: '#2563eb',
+                            },
+                            {
+                                label: competitorData.companies[2],
+                                data: [competitorData.revenue[2], competitorData.netIncome[2], competitorData.roe[2]],
+                                backgroundColor: '#f59e0b',
+                            }
+                        ]
+                    },
+                    options: commonChartOptions
+                });
+            }
+            
+            const ctxAnalystRatings = document.getElementById('analystRatingsChart');
+            if (ctxAnalystRatings) {
+                 new Chart(ctxAnalystRatings, {
+                    type: 'doughnut',
+                    data: {
+                        labels: analystData.labels,
+                        datasets: [{
+                            label: '애널리스트 평가',
+                            data: analystData.data,
+                            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                            borderColor: '#f8f9fa',
+                            borderWidth: 4
+                        }]
+                    },
+                    options: {
+                        ...commonPieOptions,
+                         plugins: {
+                            ...commonPieOptions.plugins,
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.label + ': ' + context.parsed + '명';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+            const mobileNav = document.getElementById('mobile-nav');
+
+            mobileNav.addEventListener('change', (e) => {
+                window.location.hash = e.target.value;
+            });
+            
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+                if(current) {
+                    mobileNav.value = '#' + current;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>양자 기술 트렌드 및 SEALSQ(LAES) 분석</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: A top-down narrative dashboard. It starts with the macro view of the quantum market, explains the core problem (PQC urgency), then drills down into the specific company (SEALSQ), covering its technology, business model, and applications. Finally, it connects this to investment analysis with an interactive stock chart and risk/opportunity scenarios. This structure guides the user from general context to specific insights, making the complex topic digestible and engaging. -->
+    <!-- Visualization & Content Choices: 
+        - PQC Market Growth: (Goal: Change) Chart.js Bar Chart to visualize strong CAGR. Justification: Bar charts are effective for showing discrete yearly growth.
+        - Harvest Now, Decrypt Later: (Goal: Inform) HTML/CSS diagram. Justification: A simple visual flow is more impactful than text for explaining this threat concept.
+        - SEALSQ Stock Analysis: (Goal: Correlate) Chart.js Line Chart with annotations. Justification: A line chart is ideal for time-series data, and annotations directly link market events to price fluctuations, which is a core part of the report's analysis.
+        - Business Model & Tech: (Goal: Organize) Interactive HTML/CSS cards. Justification: Cards break down complex info into digestible chunks. Interaction (click/hover) encourages user exploration.
+        - Scenarios: (Goal: Compare) JS-driven tabs. Justification: Directly contrasts bull vs. bear cases for clear, side-by-side comparison.
+        - Library/Method: Chart.js for all charts, vanilla JS for interactions, Tailwind CSS for layout. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0d9488; /* teal-600 */
+            border-bottom-color: #0d9488;
+        }
+        .scenario-btn.active {
+            background-color: #0d9488; /* teal-600 */
+            color: white;
+        }
+        .scenario-btn {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .application-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .application-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="font-bold text-xl text-teal-700">Quantum & SEALSQ</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#section-trend" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600 border-b-2 border-transparent">양자 기술 트렌드</a>
+                        <a href="#section-sealsq" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600 border-b-2 border-transparent">SEALSQ 분석</a>
+                        <a href="#section-outlook" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600 border-b-2 border-transparent">주가 및 전망</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section id="section-intro" class="text-center mb-16">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4">양자 기술, 현실이 된 미래와 SEALSQ의 기회</h1>
+            <p class="max-w-3xl mx-auto text-lg text-slate-600 mb-8">
+                본 분석은 양자 기술의 글로벌 동향과 투자 환경을 조망하고, 양자내성암호(PQC) 시장의 핵심 기업인 SEALSQ(LAES)의 사업 모델과 주가 연동성을 심층적으로 분석하여 미래 투자 전략에 대한 인사이트를 제공합니다.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <p class="text-sm text-slate-500">글로벌 양자 기술 투자</p>
+                    <p class="text-3xl font-bold text-teal-600">$557억+</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <p class="text-sm text-slate-500">PQC 시장 연평균 성장률 (24-29)</p>
+                    <p class="text-3xl font-bold text-teal-600">44.2%</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <p class="text-sm text-slate-500">2040년 양자 기술 시장 전망</p>
+                    <p class="text-3xl font-bold text-teal-600">$1,060억</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-trend" class="mb-20 pt-16">
+            <h2 class="text-3xl font-bold text-center text-slate-900 mb-4">1. 거대한 전환: 글로벌 양자 기술 트렌드</h2>
+            <p class="max-w-3xl mx-auto text-center text-slate-600 mb-12">양자 기술은 단순한 유행을 넘어 국가 안보와 산업 경쟁력의 핵심으로 부상했습니다. 막대한 투자, 정부의 정책 지원, 그리고 명확한 상용화 로드맵은 이 기술의 지속 가능한 성장을 뒷받침합니다. 특히, 양자 컴퓨터의 위협에 대응하기 위한 양자내성암호(PQC)는 시급하고 필수적인 시장을 형성하고 있습니다.</p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold text-slate-800 mb-4 text-center">양자내성암호(PQC) 시장 성장 전망</h3>
+                    <div class="chart-container">
+                        <canvas id="pqcMarketChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold text-slate-800 mb-4">"지금 수확하고, 나중에 해독하라" (HNDL)</h3>
+                    <p class="text-slate-600 mb-6">양자 기술의 가장 시급한 위협은 'Harvest Now, Decrypt Later' 공격입니다. 현재의 암호화된 데이터를 지금 당장 수집(Harvest)한 뒤, 미래에 강력한 양자 컴퓨터가 개발되면 이를 해독(Decrypt)하는 방식입니다. 이는 국가 기밀, 금융 정보, 개인 건강 기록 등 장기적인 보호가 필요한 모든 데이터를 위험에 빠뜨립니다.</p>
+                    <div class="space-y-4">
+                        <div class="flex items-center p-4 bg-slate-100 rounded-md">
+                            <span class="text-2xl mr-4">📡</span>
+                            <div>
+                                <h4 class="font-semibold">1단계: 데이터 수확 (Today)</h4>
+                                <p class="text-sm text-slate-500">공격자가 현재 암호화된 민감 데이터를 대량으로 수집 및 저장합니다.</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-center my-2"><span class="text-2xl text-slate-400">⬇️</span></div>
+                        <div class="flex items-center p-4 bg-slate-100 rounded-md">
+                            <span class="text-2xl mr-4">💻</span>
+                            <div>
+                                <h4 class="font-semibold">2단계: 양자 컴퓨터 등장 (Future)</h4>
+                                <p class="text-sm text-slate-500">기존 암호 체계를 무력화할 수 있는 양자 컴퓨터가 상용화됩니다.</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-center my-2"><span class="text-2xl text-slate-400">⬇️</span></div>
+                        <div class="flex items-center p-4 bg-red-100 rounded-md border border-red-200">
+                             <span class="text-2xl mr-4">🔓</span>
+                             <div>
+                                <h4 class="font-semibold text-red-700">3단계: 과거 데이터 해독 (Risk Realized)</h4>
+                                <p class="text-sm text-red-600">과거에 수집했던 데이터를 양자 컴퓨터로 해독하여 막대한 피해를 유발합니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-sealsq" class="mb-20 pt-16">
+            <h2 class="text-3xl font-bold text-center text-slate-900 mb-4">2. SEALSQ: 양자 시대의 보안 설계자</h2>
+            <p class="max-w-3xl mx-auto text-center text-slate-600 mb-12">SEALSQ는 반도체, PKI, 그리고 양자내성암호(PQC) 기술을 융합하여 미래의 보안 위협에 대응하고 있습니다. 회사는 하드웨어 기반의 PQC 솔루션을 통해 IoT, 핵심 인프라, 금융 등 다양한 산업 분야에 강력한 보안을 제공하는 것을 목표로 합니다.</p>
+            
+            <div class="bg-white p-8 rounded-lg shadow-lg mb-12">
+                <h3 class="text-xl font-semibold text-slate-800 mb-6 text-center">전략적 전환: PQC 중심으로의 재편</h3>
+                 <div class="grid md:grid-cols-3 gap-6 items-center text-center">
+                    <div class="p-4 rounded-lg bg-slate-100">
+                        <h4 class="font-bold text-slate-700">기존 사업</h4>
+                        <p class="text-sm text-slate-500 mt-1">전통 반도체 및 보안 솔루션</p>
+                    </div>
+                     <div class="text-4xl text-teal-500 font-mono flex items-center justify-center">
+                        <span>→</span>
+                    </div>
+                    <div class="p-4 rounded-lg bg-teal-100 border border-teal-200">
+                        <h4 class="font-bold text-teal-800">미래 사업 (핵심)</h4>
+                        <p class="text-sm text-teal-600 mt-1">양자내성암호(PQC) 칩 및 솔루션</p>
+                    </div>
+                </div>
+                <p class="mt-6 text-center text-slate-600">이러한 전략적 전환은 2024년 일시적인 매출 감소로 이어졌으나, PQC 시장의 폭발적인 성장에 대비한 선제적 투자입니다. SEALSQ는 2025년 4분기 PQC 신제품 출시를 통해 본격적인 성장을 기대하고 있습니다.</p>
+            </div>
+
+
+            <h3 class="text-2xl font-bold text-center text-slate-900 mb-8">핵심 기술 및 응용 분야</h3>
+             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="application-card bg-white p-6 rounded-lg shadow-md border-t-4 border-teal-500">
+                    <h4 class="font-bold text-lg mb-2">하드웨어 우선 PQC</h4>
+                    <p class="text-sm text-slate-600">QS7001, QVault TPM 등 PQC 알고리즘을 칩에 직접 내장하여 소프트웨어 방식보다 월등한 보안성을 제공합니다. (NIST 표준 준수)</p>
+                </div>
+                <div class="application-card bg-white p-6 rounded-lg shadow-md border-t-4 border-sky-500">
+                    <h4 class="font-bold text-lg mb-2">IoT & 핵심 인프라</h4>
+                    <p class="text-sm text-slate-600">스마트 그리드, 커넥티드 카, 위성 통신 등 17.5억개 이상의 장치에 보안을 제공하여 국가 기반 시설을 보호합니다.</p>
+                </div>
+                <div class="application-card bg-white p-6 rounded-lg shadow-md border-t-4 border-indigo-500">
+                    <h4 class="font-bold text-lg mb-2">금융 & 블록체인</h4>
+                    <p class="text-sm text-slate-600">양자 공격에 취약한 암호화폐 지갑, 금융 거래 시스템을 보호하는 PQC 솔루션을 제공합니다.</p>
+                </div>
+                <div class="application-card bg-white p-6 rounded-lg shadow-md border-t-4 border-purple-500">
+                    <h4 class="font-bold text-lg mb-2">자율 기계 & 국방</h4>
+                    <p class="text-sm text-slate-600">자율주행 드론, 로봇 등 국방 및 산업용 기기의 통신과 데이터 무결성을 보장합니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-outlook" class="pt-16">
+            <h2 class="text-3xl font-bold text-center text-slate-900 mb-4">3. 주가 동향과 미래 전망</h2>
+            <p class="max-w-3xl mx-auto text-center text-slate-600 mb-12">SEALSQ의 주가는 양자 기술 트렌드와 높은 상관관계를 보이며 큰 변동성을 나타냈습니다. 단기적인 실적 부진에도 불구하고, PQC 시장의 성장 잠재력과 회사의 선제적인 포지셔닝은 장기적인 투자 매력도를 높이고 있습니다. 아래 차트에서 이벤트 마커에 마우스를 올려보세요.</p>
+
+            <div class="bg-white p-6 rounded-lg shadow-lg mb-12">
+                 <h3 class="text-xl font-semibold text-slate-800 mb-4 text-center">SEALSQ (LAES) 주가와 주요 이벤트 (최근 12개월)</h3>
+                <div class="chart-container">
+                    <canvas id="stockChart"></canvas>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div class="bg-white p-8 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold text-slate-800 mb-6 text-center">리스크와 기회</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-bold text-red-600 mb-2">🚨 주요 리스크</h4>
+                            <ul class="list-disc list-inside space-y-1 text-slate-600 text-sm">
+                                <li>PQC 기술 상용화 지연 또는 시장 성장 둔화</li>
+                                <li>대형 반도체 기업과의 경쟁 심화</li>
+                                <li>전략적 전환에 따른 단기적 수익성 악화</li>
+                                <li>신흥 기술주로서의 높은 주가 변동성</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-green-600 mb-2">🚀 주요 기회</h4>
+                            <ul class="list-disc list-inside space-y-1 text-slate-600 text-sm">
+                                <li>NIST 표준 기반 PQC 시장 선점 효과</li>
+                                <li>$9,300만 규모의 잠재적 계약 파이프라인 (26-28년)</li>
+                                <li>하드웨어 기반 솔루션의 기술적 차별성</li>
+                                <li>부채 없는 견고한 재무 상태 ($8,500만 현금)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold text-slate-800 mb-6 text-center">향후 성장 시나리오 (2026-2028)</h3>
+                    <div class="flex justify-center mb-6">
+                        <div class="inline-flex rounded-md shadow-sm" role="group">
+                            <button type="button" id="bull-btn" class="scenario-btn active px-4 py-2 text-sm font-medium text-white bg-teal-600 border border-gray-200 rounded-l-lg hover:bg-teal-700">긍정적 시나리오</button>
+                            <button type="button" id="bear-btn" class="scenario-btn px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100">보수적 시나리오</button>
+                        </div>
+                    </div>
+                    <div id="scenario-content">
+                        <div id="bull-scenario">
+                            <h4 class="font-bold text-teal-700 mb-2">PQC 시장 개화, 선두주자로 도약</h4>
+                            <p class="text-sm text-slate-600">NIST 표준 기반의 PQC 전환이 본격화되면서 정부 및 기업의 수요가 폭발적으로 증가합니다. SEALSQ는 시장 선점 효과를 바탕으로 계약 파이프라인을 현실화하며 매출 급성장을 이룹니다. TPM 시장 점유율 20% 목표 달성과 함께 우주 기반 QKD 등 신사업의 가치가 부각되며 주가는 재평가받습니다.</p>
+                        </div>
+                        <div id="bear-scenario" class="hidden">
+                             <h4 class="font-bold text-amber-700 mb-2">기술 성숙 지연, 더딘 성장</h4>
+                            <p class="text-sm text-slate-600">양자 컴퓨터의 위협이 과대평가되었거나 기술 발전이 더뎌지면서 PQC 시장 성장이 예상보다 둔화됩니다. 경쟁 심화로 수익성이 압박받고, 신제품 출시에도 불구하고 매출 회복이 더딥니다. 주가는 장기적인 R&D 투자 부담과 불확실성으로 인해 횡보하거나 하락할 수 있습니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-white mt-20">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-sm">
+            <p>&copy; 2025 Quantum Technology & SEALSQ Analysis. All rights reserved.</p>
+            <p class="text-slate-400 mt-1">이 분석은 제공된 보고서 내용을 기반으로 하며, 투자 권유를 목적으로 하지 않습니다.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const pqcData = {
+                labels: ['2024', '2025', '2026', '2027', '2028', '2029'],
+                datasets: [{
+                    label: 'PQC 시장 규모 (백만 달러)',
+                    data: [302.5, 436.2, 629.0, 907.1, 1308.0, 1887.0],
+                    backgroundColor: 'rgba(13, 148, 136, 0.6)',
+                    borderColor: 'rgba(13, 148, 136, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            const pqcMarketCtx = document.getElementById('pqcMarketChart').getContext('2d');
+            new Chart(pqcMarketCtx, {
+                type: 'bar',
+                data: pqcData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y * 1000000);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '시장 규모 (백만 달러)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const stockData = {
+                labels: ['12개월 전', '10개월 전', '8개월 전', '6개월 전', '4개월 전', '2개월 전', '현재'],
+                datasets: [{
+                    label: 'LAES 주가',
+                    data: [0.8, 1.5, 1.2, 4.5, 9.8, 5.0, 3.25],
+                    fill: true,
+                    backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                    borderColor: 'rgb(56, 189, 248)',
+                    tension: 0.3
+                }]
+            };
+            
+            const annotations = [
+                { x: '8개월 전', y: 1.2, text: '실적 발표: 전략적 전환으로 인한 매출 감소' },
+                { x: '6개월 전', y: 4.5, text: 'NIST, PQC 표준화 로드맵 강조' },
+                { x: '4개월 전', y: 9.8, text: 'WISeSat 위성 발사 및 PQC 칩 탑재 발표' },
+                { x: '2개월 전', y: 5.0, text: '반도체 시장 조정 및 차익 실현' }
+            ];
+
+            const stockCtx = document.getElementById('stockChart').getContext('2d');
+            new Chart(stockCtx, {
+                type: 'line',
+                data: stockData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                           mode: 'index',
+                           intersect: false,
+                        },
+                        annotation: {
+                            annotations: annotations.map(a => ({
+                                type: 'point',
+                                xValue: a.x,
+                                yValue: a.y,
+                                backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                                radius: 5,
+                                pointStyle: 'circle',
+                                hoverRadius: 8
+                            })).concat(annotations.map(a => ({
+                                type: 'label',
+                                xValue: a.x,
+                                yValue: a.y,
+                                content: a.text,
+                                position: 'start',
+                                yAdjust: -20,
+                                xAdjust: -10,
+                                font: { size: 10 },
+                                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                color: '#333',
+                                padding: 4,
+                                borderRadius: 4,
+                            })))
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: { display: true, text: '주가 ($)' }
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'customAnnotations',
+                    afterDraw: chart => {
+                        const ctx = chart.ctx;
+                        const meta = chart.getDatasetMeta(0);
+                        annotations.forEach(annotation => {
+                            const point = meta.data.find(p => chart.data.labels[p.$context.dataIndex] === annotation.x);
+                            if (!point) return;
+
+                            ctx.save();
+                            
+                            const x = point.x;
+                            const y = point.y;
+                            
+                            // Draw point
+                            ctx.beginPath();
+                            ctx.arc(x, y, 5, 0, Math.PI * 2, true);
+                            ctx.fillStyle = 'rgba(239, 68, 68, 0.8)';
+                            ctx.fill();
+
+                            // Draw label
+                            ctx.font = '12px "Noto Sans KR"';
+                            const textWidth = ctx.measureText(annotation.text).width;
+                            const textX = x - (textWidth / 2);
+                            const textY = y - 15;
+                            
+                            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                            ctx.fillRect(textX - 5, textY - 15, textWidth + 10, 20);
+                            
+                            ctx.fillStyle = 'white';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(annotation.text, x, y-7);
+                            ctx.restore();
+                        });
+                    }
+                }]
+            });
+
+
+            const bullBtn = document.getElementById('bull-btn');
+            const bearBtn = document.getElementById('bear-btn');
+            const bullScenario = document.getElementById('bull-scenario');
+            const bearScenario = document.getElementById('bear-scenario');
+
+            bullBtn.addEventListener('click', () => {
+                bullBtn.classList.add('active');
+                bearBtn.classList.remove('active');
+                bullScenario.classList.remove('hidden');
+                bearScenario.classList.add('hidden');
+            });
+
+            bearBtn.addEventListener('click', () => {
+                bearBtn.classList.add('active');
+                bullBtn.classList.remove('active');
+                bearScenario.classList.remove('hidden');
+                bullScenario.classList.add('hidden');
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                })
+            });
+
+             navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>

@@ -30,12 +30,12 @@
             max-width: 700px;
             margin-left: auto;
             margin-right: auto;
-            height: 350px;
-            max-height: 400px;
+            height: 400px;
+            max-height: 480px;
         }
         @media (min-width: 768px) {
             .chart-container {
-                height: 400px;
+                height: 450px;
             }
         }
         .nav-link {
@@ -323,10 +323,10 @@
             };
             
             const annotations = [
-                { x: '8개월 전', y: 1.2, text: '실적 발표: 전략적 전환으로 인한 매출 감소' },
-                { x: '6개월 전', y: 4.5, text: 'NIST, PQC 표준화 로드맵 강조' },
-                { x: '4개월 전', y: 9.8, text: 'WISeSat 위성 발사 및 PQC 칩 탑재 발표' },
-                { x: '2개월 전', y: 5.0, text: '반도체 시장 조정 및 차익 실현' }
+                { x: '8개월 전', y: 1.2, text: '실적 발표:\n전략적 전환으로 인한\n매출 감소', position: 'top' },
+                { x: '6개월 전', y: 4.5, text: 'NIST, PQC\n표준화 로드맵 강조', position: 'top' },
+                { x: '4개월 전', y: 9.8, text: 'WISeSat 위성 발사 및\nPQC 칩 탑재 발표', position: 'bottom' },
+                { x: '2개월 전', y: 5.0, text: '반도체 시장 조정 및\n차익 실현', position: 'top' }
             ];
 
             const stockCtx = document.getElementById('stockChart').getContext('2d');
@@ -336,6 +336,14 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 50,
+                            bottom: 50,
+                            left: 10,
+                            right: 10
+                        }
+                    },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
@@ -390,22 +398,72 @@
                             
                             // Draw point
                             ctx.beginPath();
-                            ctx.arc(x, y, 5, 0, Math.PI * 2, true);
-                            ctx.fillStyle = 'rgba(239, 68, 68, 0.8)';
+                            ctx.arc(x, y, 6, 0, Math.PI * 2, true);
+                            ctx.fillStyle = 'rgba(239, 68, 68, 0.9)';
                             ctx.fill();
+                            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
 
-                            // Draw label
-                            ctx.font = '12px "Noto Sans KR"';
-                            const textWidth = ctx.measureText(annotation.text).width;
-                            const textX = x - (textWidth / 2);
-                            const textY = y - 15;
-                            
-                            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-                            ctx.fillRect(textX - 5, textY - 15, textWidth + 10, 20);
-                            
-                            ctx.fillStyle = 'white';
+                            // 텍스트를 여러줄로 나누기
+                            const lines = annotation.text.split('\n');
+                            ctx.font = '11px "Noto Sans KR"';
                             ctx.textAlign = 'center';
-                            ctx.fillText(annotation.text, x, y-7);
+                            
+                            // 가장 긴 줄의 너비 계산
+                            let maxWidth = 0;
+                            lines.forEach(line => {
+                                const lineWidth = ctx.measureText(line).width;
+                                if (lineWidth > maxWidth) maxWidth = lineWidth;
+                            });
+                            
+                            const padding = 8;
+                            const lineHeight = 14;
+                            const boxHeight = lines.length * lineHeight + padding * 2;
+                            const boxWidth = maxWidth + padding * 2;
+                            
+                            // 텍스트 위치 결정 (위쪽 또는 아래쪽)
+                            let textY;
+                            if (annotation.position === 'top') {
+                                textY = y - 20 - boxHeight;
+                            } else {
+                                textY = y + 20;
+                            }
+                            
+                            // 차트 영역을 벗어나지 않도록 조정
+                            if (textY < 0) textY = y + 20;
+                            if (textY + boxHeight > chart.height) textY = y - 20 - boxHeight;
+                            
+                            // 배경 박스 그리기
+                            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                            ctx.shadowBlur = 4;
+                            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                            ctx.fillRect(x - boxWidth/2, textY, boxWidth, boxHeight);
+                            ctx.shadowBlur = 0;
+                            
+                            // 테두리 그리기
+                            ctx.strokeStyle = 'rgba(200, 200, 200, 0.8)';
+                            ctx.lineWidth = 1;
+                            ctx.strokeRect(x - boxWidth/2, textY, boxWidth, boxHeight);
+                            
+                            // 포인터에서 텍스트 박스로 연결선 그리기
+                            ctx.beginPath();
+                            ctx.moveTo(x, y);
+                            if (annotation.position === 'top') {
+                                ctx.lineTo(x, textY + boxHeight);
+                            } else {
+                                ctx.lineTo(x, textY);
+                            }
+                            ctx.strokeStyle = 'rgba(239, 68, 68, 0.6)';
+                            ctx.lineWidth = 1;
+                            ctx.stroke();
+                            
+                            // 텍스트 그리기
+                            ctx.fillStyle = 'rgba(51, 51, 51, 0.9)';
+                            lines.forEach((line, index) => {
+                                ctx.fillText(line, x, textY + padding + (index + 1) * lineHeight - 2);
+                            });
+                            
                             ctx.restore();
                         });
                     }

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>트럼프 수혜주 대화형 분석 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A non-linear, dashboard-style Single Page Application (SPA). The structure prioritizes the report's key findings—the two recommended stocks (Halliburton & Nucor)—by presenting them upfront. The core of the app is an interactive comparison dashboard where users can toggle between the two companies. Selecting a company dynamically updates all content blocks, including a company profile, key financial metrics (as visual cards), financial trend charts (Revenue, FCF, Assets), and a tabbed section for detailed text analysis (Investment Thesis, Risks, Timing). A collapsible section provides the broader policy context. This user-flow-centric design was chosen to transform the dense, linear report into an interactive analysis tool, enabling users to easily compare the two primary investment candidates and explore supporting data on demand, which is far more engaging and usable than simply reading the report. -->
+    <!-- Visualization & Content Choices: 
+        - Report Key Findings (HAL/NUE) -> Goal: Highlight -> Presentation: Prominent clickable cards -> Justification: Immediately surfaces the report's actionable conclusion.
+        - Financial Trends (Revenue, FCF, Assets) -> Goal: Compare/Show Change -> Viz: Bar Charts (Chart.js/Canvas) -> Interaction: Hover tooltips -> Justification: Visualizes trends more effectively than a static data table.
+        - Valuation/Debt Metrics -> Goal: Inform/Compare -> Presentation: Styled KPI cards (HTML/Tailwind) -> Justification: Provides a quick, scannable overview of financial health.
+        - Detailed Text Analysis (Thesis, Risks) -> Goal: Organize -> Presentation: Tabbed content area (HTML/JS) -> Interaction: Clickable tabs -> Justification: Manages text density and allows focused reading without overwhelming the user.
+        - Company Selection -> Goal: Control/Navigate -> Presentation: Main toggle buttons -> Interaction: Click to update dashboard -> Justification: Core interactive mechanism for the application, enabling direct comparison.
+        - Economic Moat -> Goal: Inform -> Presentation: Icon + Text (Unicode Shield) -> Justification: Offers a quick visual shorthand for competitive strength.
+        - Policy Context -> Goal: Organize/Inform -> Presentation: Collapsible Accordion -> Interaction: Click to expand/collapse -> Justification: Hides secondary background info to keep the main view clean, making it available on-demand for deeper dives.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            max-height: 320px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 350px;
+            }
+        }
+        .tab-button.active {
+            border-color: #1d4ed8;
+            color: #1d4ed8;
+            background-color: #eff6ff;
+        }
+        .company-selector.active {
+            background-color: #1e40af;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+
+        <header class="text-center mb-10">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">미국 주식 심층 분석 대시보드</h1>
+            <p class="text-base sm:text-lg text-gray-600">트럼프 재집권 시 수혜 예상 저평가 가치주 탐색</p>
+        </header>
+
+        <main>
+            <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                <h2 class="text-2xl font-bold mb-4 text-center text-blue-800">핵심 투자 대상 기업</h2>
+                <p class="text-center text-gray-600 mb-6 max-w-3xl mx-auto">본 보고서는 재무 건전성, 경제적 해자, 저평가, 그리고 트럼프 행정부의 잠재적 정책 수혜 가능성을 종합하여 다음 두 기업을 핵심 투자 대상으로 선정했습니다. 아래 버튼을 클릭하여 각 기업의 상세 분석을 확인하세요.</p>
+                <div class="flex justify-center gap-4">
+                    <button id="select-HAL" class="company-selector text-lg font-bold py-3 px-8 rounded-full transition-all duration-300">Halliburton (HAL)</button>
+                    <button id="select-NUE" class="company-selector text-lg font-bold py-3 px-8 rounded-full transition-all duration-300">Nucor (NUE)</button>
+                </div>
+            </div>
+
+            <div id="dashboard-content" class="fade-in">
+                <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                    <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 id="company-name" class="text-2xl font-bold mb-4"></h3>
+                        <p id="company-description" class="text-gray-600 mb-4"></p>
+                        <div class="space-y-3">
+                            <div>
+                                <h4 class="font-semibold text-gray-700">경제적 해자 (Economic Moat)</h4>
+                                <p id="company-moat" class="text-blue-700 font-bold"></p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-700">트럼프 정책 수혜 포인트</h4>
+                                <p id="policy-benefit" class="text-gray-600"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-bold mb-4 text-center">핵심 재무 및 밸류에이션 지표</h3>
+                        <div id="kpi-cards" class="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-500">PER</p>
+                                <p id="kpi-per" class="text-2xl font-bold"></p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-500">PBR</p>
+                                <p id="kpi-pbr" class="text-2xl font-bold"></p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-500">EV/EBITDA</p>
+                                <p id="kpi-evebitda" class="text-2xl font-bold"></p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-500">부채비율(D/E)</p>
+                                <p id="kpi-debt" class="text-2xl font-bold"></p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg col-span-2 md:col-span-1">
+                                <p class="text-sm text-gray-500">적정가치 대비</p>
+                                <p id="kpi-valuation" class="text-2xl font-bold text-green-600"></p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+                     <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-bold mb-4 text-center">매출 성장 추이 (십억 $)</h3>
+                        <div class="chart-container"><canvas id="revenue-chart"></canvas></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-bold mb-4 text-center">자산 성장 추이 (십억 $)</h3>
+                        <div class="chart-container"><canvas id="assets-chart"></canvas></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg md:col-span-2 lg:col-span-1">
+                        <h3 class="text-xl font-bold mb-4 text-center">잉여현금흐름(FCF) 추이 (십억 $)</h3>
+                        <div class="chart-container"><canvas id="fcf-chart"></canvas></div>
+                    </div>
+                </section>
+
+                <section class="bg-white p-6 rounded-2xl shadow-lg">
+                    <h3 class="text-xl font-bold mb-4">상세 분석</h3>
+                    <div class="border-b border-gray-200 mb-4">
+                        <nav class="flex space-x-2 sm:space-x-4" aria-label="Tabs">
+                             <button data-tab="thesis" class="tab-button font-medium text-gray-500 whitespace-nowrap py-2 px-2 sm:px-4 border-b-2 border-transparent text-sm sm:text-base">투자 논리</button>
+                             <button data-tab="risks" class="tab-button font-medium text-gray-500 whitespace-nowrap py-2 px-2 sm:px-4 border-b-2 border-transparent text-sm sm:text-base">리스크 요인</button>
+                             <button data-tab="timing" class="tab-button font-medium text-gray-500 whitespace-nowrap py-2 px-2 sm:px-4 border-b-2 border-transparent text-sm sm:text-base">기술적 분석 및 타이밍</button>
+                        </nav>
+                    </div>
+                    <div id="analysis-content" class="text-gray-700 leading-relaxed"></div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const reportData = {
+                'HAL': {
+                    name: 'Halliburton (HAL)',
+                    description: '북미 최대의 유전 서비스 회사로, 수압 파쇄 및 완결, 시추 기술 분야에서 시장을 선도하고 있습니다. 생산자의 개발 비용 절감을 위한 핵심 솔루션을 제공합니다.',
+                    moat: '좁은 해자 (Narrow Moat) 🛡️',
+                    policyBenefit: '친화석 연료 정책, 규제 완화 및 국내 석유/가스 생산 증대 노력의 직접적인 수혜가 예상됩니다.',
+                    kpis: {
+                        per: '9.59x',
+                        pbr: '2.28x',
+                        evebitda: '5.2x',
+                        debt: '72.4%',
+                        valuation: '44.1% 저평가'
+                    },
+                    financials: {
+                        labels: ['2020', '2021', '2022', '2023', '2024'],
+                        revenue: [14.45, 15.30, 20.30, 23.02, 22.94],
+                        assets: [20.68, 22.32, 23.25, 24.68, 25.59],
+                        fcf: [0.89, 1.37, 1.43, 2.27, 1.10],
+                    },
+                    analysis: {
+                        thesis: `트럼프의 친화석 연료 정책과 유가가 안정화될 경우 국내 시추 활동 증가로 수혜를 볼 수 있습니다. 특히 트럼프의 상호 관세 정책에서 석유/가스 분야가 제외된 점은 긍정적입니다. 현재 밸류에이션은 5년래 최저 수준으로, 산업 평균 대비 현저히 낮아 '저점 구간'의 매력을 가집니다. 부채비율은 지난 5년간 크게 개선되었으며, 견고한 현금 흐름으로 안정적인 관리가 가능합니다.`,
+                        risks: `최근 북미 시추 수요 감소가 단기적인 역풍으로 작용하고 있습니다. 또한, 수입 철강 및 부품에 대한 관세 정책은 장비 비용 상승과 공급망 교란을 야기할 수 있습니다. 유가 변동성에 따른 실적 민감도가 높으며, 국제 시장의 지정학적 불확실성도 리스크 요인입니다. 최근 1분기 실적에서 이익 감소 및 북미 매출 하락이 관찰되었습니다.`,
+                        timing: `최근 주가는 연초 대비, 그리고 지난 1년간 시장 대비 저조한 성과를 보이며 '저점 구간'에 진입했습니다. 매수 타이밍은 주가 안정화 신호와 반전 패턴(예: 이중 바닥, 강세 다이버전스) 확인 후 고려하는 것이 바람직합니다. 50일 이동평균선이 200일선을 상향 돌파하는 골든 크로스와 거래량 증가는 추세 전환의 중요한 신호가 될 수 있습니다. 견고한 지지선 형성 확인이 필요합니다.`
+                    }
+                },
+                'NUE': {
+                    name: 'Nucor (NUE)',
+                    description: '북미 최대의 다각화된 철강 및 철강 제품 생산 기업이자 최대 재활용 기업입니다. 혁신적인 생산 공정과 가변적 비용 구조로 높은 경쟁력을 자랑합니다.',
+                    moat: '넓은 해자 (Wide Moat) 🛡️🛡️',
+                    policyBenefit: '철강 수입품에 대한 보호무역 관세 강화와 대규모 인프라 투자 확대 정책의 직접적인 수혜주입니다.',
+                    kpis: {
+                        per: '9.61x',
+                        pbr: '2.08x',
+                        evebitda: '5.73x',
+                        debt: '33.0%',
+                        valuation: '저평가 상태'
+                    },
+                    financials: {
+                        labels: ['2020', '2021', '2022', '2023', '2024'],
+                        revenue: [20.14, 36.48, 41.51, 34.71, 30.73],
+                        assets: [20.12, 25.82, 32.47, 35.34, 33.94],
+                        fcf: [1.22, 2.54, 8.30, 6.11, 1.75],
+                    },
+                    analysis: {
+                        thesis: `트럼프 행정부의 철강 수입품 50% 관세 정책은 Nucor에게 강력한 '보호 우산'을 제공하여 가격 결정력을 높이고 수익성을 직접적으로 개선할 수 있습니다. 인프라 투자 확대 역시 철강 수요 증가로 이어질 핵심 동력입니다. 업계 최고 수준의 낮은 부채비율과 신용 등급, 그리고 경기 사이클을 버텨내는 강력한 현금흐름 창출 능력은 투자 안정성을 더합니다.`,
+                        risks: `관세로 인한 철강 가격 상승은 자동차, 건설 등 하위 산업에 비용 부담을 주어 장기적으로 전반적인 철강 수요를 위축시킬 수 있습니다. 대규모 자본 지출 계획(2025년 30억 달러)은 단기적으로 현금 흐름에 부담을 주고 자사주 매입 속도를 늦출 수 있습니다. 철강 산업 자체의 경기 순환적 특성은 본질적인 리스크입니다.`,
+                        timing: `최근 철강 가격 안정화와 함께 관세 인상 기대감이 주가에 긍정적으로 작용할 가능성이 있습니다. 현재 밸류에이션은 저평가 상태로 판단됩니다. 기술적으로는 주가가 하락 추세에서 벗어나 주요 이동평균선(20일, 50일) 위로 안착하는 시점을 노리는 것이 좋습니다. 강력한 거래량을 동반한 저항선 돌파는 중요한 매수 신호가 될 수 있으며, 관세 정책 효과가 시장에 반영되는 시점이 매력적인 타이밍이 될 것입니다.`
+                    }
+                }
+            };
+
+            let currentTicker = 'HAL';
+            let currentAnalysisTab = 'thesis';
+            let chartInstances = {};
+
+            const companyNameEl = document.getElementById('company-name');
+            const companyDescriptionEl = document.getElementById('company-description');
+            const companyMoatEl = document.getElementById('company-moat');
+            const policyBenefitEl = document.getElementById('policy-benefit');
+            const kpiPerEl = document.getElementById('kpi-per');
+            const kpiPbrEl = document.getElementById('kpi-pbr');
+            const kpiEvebitdaEl = document.getElementById('kpi-evebitda');
+            const kpiDebtEl = document.getElementById('kpi-debt');
+            const kpiValuationEl = document.getElementById('kpi-valuation');
+            const analysisContentEl = document.getElementById('analysis-content');
+            const dashboardContentEl = document.getElementById('dashboard-content');
+
+            const selectHALBtn = document.getElementById('select-HAL');
+            const selectNUEBtn = document.getElementById('select-NUE');
+            const tabButtons = document.querySelectorAll('.tab-button');
+            
+            function createOrUpdateChart(id, labels, data, chartLabel, backgroundColor) {
+                const ctx = document.getElementById(id).getContext('2d');
+                if (chartInstances[id]) {
+                    chartInstances[id].destroy();
+                }
+                chartInstances[id] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: chartLabel,
+                            data: data,
+                            backgroundColor: backgroundColor,
+                            borderColor: backgroundColor.replace('0.6', '1'),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += context.parsed.y.toFixed(2) + ' B';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    font: { size: 10 }
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    font: { size: 12 }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateDashboard() {
+                const data = reportData[currentTicker];
+                
+                dashboardContentEl.classList.remove('fade-in');
+                void dashboardContentEl.offsetWidth; 
+                dashboardContentEl.classList.add('fade-in');
+
+                companyNameEl.textContent = data.name;
+                companyDescriptionEl.textContent = data.description;
+                companyMoatEl.textContent = data.moat;
+                policyBenefitEl.textContent = data.policyBenefit;
+
+                kpiPerEl.textContent = data.kpis.per;
+                kpiPbrEl.textContent = data.kpis.pbr;
+                kpiEvebitdaEl.textContent = data.kpis.evebitda;
+                kpiDebtEl.textContent = data.kpis.debt;
+                kpiValuationEl.textContent = data.kpis.valuation;
+                
+                createOrUpdateChart('revenue-chart', data.financials.labels, data.financials.revenue, '매출', 'rgba(54, 162, 235, 0.6)');
+                createOrUpdateChart('assets-chart', data.financials.labels, data.financials.assets, '자산', 'rgba(75, 192, 192, 0.6)');
+                createOrUpdateChart('fcf-chart', data.financials.labels, data.financials.fcf, 'FCF', 'rgba(255, 159, 64, 0.6)');
+
+                updateAnalysisContent();
+                updateSelectors();
+            }
+
+            function updateAnalysisContent() {
+                analysisContentEl.textContent = reportData[currentTicker].analysis[currentAnalysisTab];
+            }
+            
+            function updateSelectors() {
+                selectHALBtn.classList.toggle('active', currentTicker === 'HAL');
+                selectNUEBtn.classList.toggle('active', currentTicker === 'NUE');
+                
+                tabButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.tab === currentAnalysisTab);
+                });
+            }
+
+            selectHALBtn.addEventListener('click', () => {
+                currentTicker = 'HAL';
+                updateDashboard();
+            });
+
+            selectNUEBtn.addEventListener('click', () => {
+                currentTicker = 'NUE';
+                updateDashboard();
+            });
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    currentAnalysisTab = button.dataset.tab;
+                    updateAnalysisContent();
+                    updateSelectors();
+                });
+            });
+
+            updateDashboard();
+        });
+    </script>
+
+</body>
+</html>

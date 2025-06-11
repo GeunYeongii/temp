@@ -421,21 +421,23 @@
                         labels: financialData.years,
                         datasets: [
                             {
-                                label: '매출 (억 달러)',
-                                data: financialData.revenue,
-                                backgroundColor: '#14b8a6',
-                                borderColor: '#0f766e',
-                                borderWidth: 1,
-                                yAxisID: 'y'
-                            },
-                            {
                                 label: '영업이익 (억 달러)',
                                 data: financialData.operatingIncome,
                                 type: 'line',
                                 borderColor: '#f97316',
                                 backgroundColor: '#f97316',
                                 tension: 0.3,
-                                yAxisID: 'y'
+                                yAxisID: 'y',
+                                order: 1
+                            },
+                            {
+                                label: '매출 (억 달러)',
+                                data: financialData.revenue,
+                                backgroundColor: '#14b8a6',
+                                borderColor: '#0f766e',
+                                borderWidth: 1,
+                                yAxisID: 'y',
+                                order: 2
                             },
                         ]
                     },

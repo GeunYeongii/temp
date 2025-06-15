@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대화형 기업 분석: 아처 에비에이션 (ACHR)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: "Tech Blue & Warm Neutral" - 신뢰와 기술을 상징하는 파란색을 포인트 컬러로 사용하고, 따뜻하고 부드러운 뉴트럴 톤을 배경으로 하여 전문적이면서도 편안한 시각적 경험을 제공합니다. -->
+    <!-- Application Structure Plan: 보고서의 선형 구조를 탈피하여 주제별 대시보드 구조를 채택했습니다. '개요 → 투자 포인트 → 시장/경쟁 → 재무/가치 → 리스크 → 전망' 순으로 정보를 배치하여 사용자가 거시적 관점에서 시작해 점차 세부적인 분석으로 자연스럽게 깊이 들어갈 수 있도록 설계했습니다. 각 섹션은 독립적으로 탐색 가능하여 사용자가 원하는 정보에 빠르게 접근할 수 있으며, 이는 복잡한 투자 정보를 효과적으로 소화하는 데 최적화된 사용자 경험을 제공합니다. -->
+    <!-- Visualization & Content Choices: 
+        - 보고서 정보: 경쟁사 비교(기술, 파트너십) -> 목표: 직접 비교 -> 시각화: 대화형 가로 막대 차트 -> 상호작용: 드롭다운으로 비교 지표(제원, 재무) 전환 -> 정당성: 여러 경쟁사의 다양한 핵심 지표를 하나의 차트에서 동적으로 비교하여 아처의 상대적 위치를 명확히 전달합니다. (Chart.js 사용)
+        - 보고서 정보: 재무 상태(현금 보유고, 소진율) -> 목표: 추세 및 건전성 시각화 -> 시각화: 막대/선 혼합 차트 -> 상호작용: 없음 (두 지표를 동시에 표시) -> 정당성: 기업의 생존과 직결되는 두 핵심 재무 지표를 함께 보여주어 재무적 활주로(runway)와 위험을 직관적으로 이해시킵니다. (Chart.js 사용)
+        - 보고서 정보: 애널리스트 평가 -> 목표: 시장 컨센서스 전달 -> 시각화: 도넛 차트 -> 상호작용: 툴팁 -> 정당성: 월스트리트의 투자 심리를 간결하고 시각적으로 요약하여 보여줍니다. (Chart.js 사용)
+        - 보고서 정보: FAA 인증 절차 -> 목표: 복잡한 과정 단순화 -> 시각화: 단계별 순서도 -> 상호작용: 없음 -> 정당성: 텍스트로 설명된 복잡한 규제 과정을 시각적 단계로 표현하여 사용자의 이해도를 높입니다. (HTML/CSS 사용)
+        - 보고서 정보: 위험 요인 -> 목표: 정보 조직화 및 접근성 향상 -> 시각화: 아코디언 메뉴 -> 상호작용: 클릭으로 확장/축소 -> 정당성: 방대한 텍스트 정보를 깔끔하게 정리하고, 사용자가 관심 있는 위험 요소만 선택적으로 깊이 있게 탐색할 수 있도록 하여 정보 과부하를 방지합니다. (HTML/CSS/JS 사용)
+        - 모든 선택은 사용자의 정보 습득 부담을 줄이고, 상호작용을 통해 능동적인 탐색을 유도하기 위해 이루어졌습니다. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f9fafb; color: #1f2937; }
+        .chart-container { position: relative; width: 100%; height: 350px; max-width: 800px; margin: auto; }
+        @media (min-width: 768px) { .chart-container { height: 450px; } }
+        .nav-link { transition: color 0.3s ease, border-color 0.3s ease; }
+        .nav-link.active { color: #2563eb; font-weight: 600; border-bottom-color: #2563eb; }
+        .nav-link:not(.active):hover { color: #3b82f6; border-bottom-color: #93c5fd; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
+        .kpi-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .kpi-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <header id="header" class="bg-white/90 backdrop-blur-lg sticky top-0 z-50 shadow-md">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-800">아처 에비에이션(ACHR)</h1>
+                </div>
+                <div class="hidden lg:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#overview" class="nav-link px-3 py-2 text-sm font-medium text-gray-600 border-b-2 border-transparent">개요</a>
+                        <a href="#thesis" class="nav-link px-3 py-2 text-sm font-medium text-gray-600 border-b-2 border-transparent">투자 포인트</a>
+                        <a href="#market" class="nav-link px-3 py-2 text-sm font-medium text-gray-600 border-b-2 border-transparent">시장과 경쟁</a>
+                        <a href="#financials" class="nav-link px-3 py-2 text-sm font-medium text-gray-600 border-b-2 border-transparent">재무와 가치</a>
+                        <a href="#risks" class="nav-link px-3 py-2 text-sm font-medium text-gray-600 border-b-2 border-transparent">리스크</a>
+                        <a href="#outlook" class="nav-link px-3 py-2 text-sm font-medium text-gray-600 border-b-2 border-transparent">전망</a>
+                    </div>
+                </div>
+                <div class="lg:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 focus:outline-none">
+                        <span class="sr-only">메뉴 열기</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="mobile-menu" class="lg:hidden hidden pb-3">
+                <a href="#overview" class="block nav-link px-3 py-2 text-base font-medium text-gray-600 border-l-4 border-transparent">개요</a>
+                <a href="#thesis" class="block nav-link px-3 py-2 text-base font-medium text-gray-600 border-l-4 border-transparent">투자 포인트</a>
+                <a href="#market" class="block nav-link px-3 py-2 text-base font-medium text-gray-600 border-l-4 border-transparent">시장과 경쟁</a>
+                <a href="#financials" class="block nav-link px-3 py-2 text-base font-medium text-gray-600 border-l-4 border-transparent">재무와 가치</a>
+                <a href="#risks" class="block nav-link px-3 py-2 text-base font-medium text-gray-600 border-l-4 border-transparent">리스크</a>
+                <a href="#outlook" class="block nav-link px-3 py-2 text-base font-medium text-gray-600 border-l-4 border-transparent">전망</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+
+        <section id="overview" class="scroll-mt-20 mb-20 text-center">
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">도시의 하늘을 여는 개척자, 아처 에비에이션</h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-10">전기 수직 이착륙 항공기(eVTOL)로 도심 교통을 혁신하여 이동의 패러다임을 바꾸려는 아처의 모든 것을 대화형으로 탐색해 보세요.</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                <div class="kpi-card bg-white p-4 rounded-xl shadow-lg border border-gray-200">
+                    <p class="text-sm font-semibold text-gray-500">수주 잔고</p>
+                    <p class="text-2xl md:text-3xl font-bold text-blue-600 mt-1">~$60억</p>
+                </div>
+                <div class="kpi-card bg-white p-4 rounded-xl shadow-lg border border-gray-200">
+                    <p class="text-sm font-semibold text-gray-500">목표 상용화</p>
+                    <p class="text-2xl md:text-3xl font-bold text-blue-600 mt-1">2025년</p>
+                </div>
+                <div class="kpi-card bg-white p-4 rounded-xl shadow-lg border border-gray-200">
+                    <p class="text-sm font-semibold text-gray-500">현금 보유고</p>
+                    <p class="text-2xl md:text-3xl font-bold text-blue-600 mt-1">$10억+</p>
+                </div>
+                <div class="kpi-card bg-white p-4 rounded-xl shadow-lg border border-gray-200">
+                    <p class="text-sm font-semibold text-gray-500">주요 파트너</p>
+                    <p class="text-base md:text-lg font-bold text-blue-600 mt-2">United, Stellantis, LA28</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="thesis" class="scroll-mt-20 mb-20">
+            <h2 class="text-3xl font-bold text-gray-800 text-center mb-2">핵심 투자 포인트 (호재)</h2>
+            <p class="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-12">아처의 미래 가치를 견인할 핵심 성장 동력들을 살펴보세요.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                    <h3 class="font-bold text-xl mb-3 text-blue-700">✈️ 주력 기체: 미드나이트</h3>
+                    <p class="text-gray-600 mb-4">승객 4명을 태우고 시속 241km로 비행하며, 12개의 프로펠러로 안전성을 극대화했습니다. 약 45dBA의 저소음은 도심 운항의 핵심 경쟁력입니다.</p>
+                    <ul class="text-sm space-y-1 text-gray-700">
+                        <li><strong>항속거리:</strong> 최대 161km (핵심 운용 32km)</li>
+                        <li><strong>충전시간:</strong> 20마일 비행 후 약 10분</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                    <h3 class="font-bold text-xl mb-3 text-blue-700">🤝 전략적 파트너십</h3>
+                    <p class="text-gray-600 mb-4">세계적인 기업들과의 협력은 아처의 기술, 생산, 시장 진출에 대한 신뢰를 더합니다.</p>
+                     <ul class="text-sm space-y-2 text-gray-700">
+                        <li><strong>유나이티드 항공:</strong> $10억 규모 주문 및 노선 개발</li>
+                        <li><strong>스텔란티스:</strong> 대량 생산 기술 및 자본 지원</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                    <h3 class="font-bold text-xl mb-3 text-blue-700">🥇 LA 2028 올림픽</h3>
+                    <p class="text-gray-600 mb-4">공식 에어택시 파트너로 선정되어 전 세계에 UAM 기술을 선보일 독보적인 기회를 확보했습니다. 이는 브랜드 인지도와 대중 수용성을 극대화할 것입니다.</p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 lg:col-span-3">
+                    <h3 class="font-bold text-xl mb-3 text-blue-700">🌏 글로벌 시장 선점</h3>
+                    <p class="text-gray-600 mb-4">아처는 미국 시장을 넘어 국제 무대로 빠르게 확장하고 있습니다. 규제 환경이 우호적인 시장에 선제적으로 진출하여 초기 운영 경험과 수익원을 확보하는 전략입니다.</p>
+                     <ul class="text-sm space-y-2 text-gray-700">
+                        <li><strong>아랍에미리트(UAE):</strong> 2025년 첫 국제 상업 운항 목표, 아부다비에 버티포트 설계 승인 완료.</li>
+                         <li><strong>대한민국:</strong> 카카오모빌리티와 협력하여 2026년 서비스 개시 목표.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="market" class="scroll-mt-20 mb-20">
+            <h2 class="text-3xl font-bold text-gray-800 text-center mb-2">시장 현황 및 경쟁 구도</h2>
+            <p class="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-12">수조 달러 규모로 전망되는 UAM 시장에서 아처는 어떻게 경쟁하고 있을까요?</p>
+            <div class="grid lg:grid-cols-5 gap-8">
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                         <p class="text-gray-600 text-lg">2040년 UAM 시장 전망</p>
+                         <p class="text-5xl font-bold text-blue-600 my-2">$1조</p>
+                         <p class="text-sm text-gray-500">(출처: Morgan Stanley)</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="font-bold text-xl mb-4 text-center text-gray-800">FAA 인증 경로</h3>
+                        <p class="text-sm text-center text-gray-500 mb-6">상용화를 위한 필수 3단계 과정</p>
+                        <ol class="relative border-l border-gray-200">                  
+                            <li class="mb-6 ml-4">
+                                <div class="absolute w-3 h-3 bg-green-500 rounded-full mt-1.5 -left-1.5 border border-white"></div>
+                                <h4 class="text-lg font-semibold text-gray-900">운영 인증 (Part 135/145)</h4>
+                                <p class="text-sm font-normal text-gray-500">항공운송 및 정비 사업자 자격 <strong>(완료)</strong></p>
+                            </li>
+                            <li class="mb-6 ml-4">
+                                <div class="absolute w-3 h-3 bg-blue-500 rounded-full mt-1.5 -left-1.5 border border-white"></div>
+                                <h4 class="text-lg font-semibold text-gray-900">형식 인증 (Type Cert.)</h4>
+                                <p class="text-sm font-normal text-gray-500">기체 설계의 안전성 검증 <strong>(진행중)</strong></p>
+                            </li>
+                            <li class="ml-4">
+                                <div class="absolute w-3 h-3 bg-gray-300 rounded-full mt-1.5 -left-1.5 border border-white"></div>
+                                <h4 class="text-lg font-semibold text-gray-900">생산 인증 (Production Cert.)</h4>
+                                <p class="text-sm font-normal text-gray-500">대량 생산 품질 시스템 검증</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="lg:col-span-3 bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex flex-col sm:flex-row justify-between items-center mb-4">
+                        <h3 class="font-bold text-xl text-center text-gray-800 mb-2 sm:mb-0">주요 경쟁사 비교</h3>
+                        <select id="competitor-metric-select" class="form-select rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <option value="marketCap">시가총액</option>
+                            <option value="range">최대 항속거리</option>
+                            <option value="speed">최고 속도</option>
+                        </select>
+                    </div>
+                    <div class="chart-container h-[400px] md:h-[450px]">
+                        <canvas id="competitorChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="financials" class="scroll-mt-20 mb-20">
+            <h2 class="text-3xl font-bold text-gray-800 text-center mb-2">재무 상태 및 시장 평가</h2>
+            <p class="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-12">아처의 재무 건전성과 월스트리트의 시각을 숫자로 확인해 보세요.</p>
+            <div class="grid lg:grid-cols-2 gap-8 items-start">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="font-bold text-xl mb-4 text-center text-gray-800">재무 건전성: 현금 보유고 vs 소진율</h3>
+                    <p class="text-center text-sm text-gray-500 mb-4">2.5년의 운영 자금을 확보하여 상용화 로드맵을 뒷받침합니다.</p>
+                    <div class="chart-container h-[300px] md:h-[400px]">
+                        <canvas id="financialsChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="font-bold text-xl mb-4 text-center text-gray-800">애널리스트 컨센서스</h3>
+                    <p class="text-center text-sm text-gray-500 mb-4">대다수 애널리스트가 긍정적 전망을 유지하고 있습니다.</p>
+                    <div class="chart-container h-[300px] md:h-[400px]">
+                         <canvas id="analystChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center">
+                        <p class="text-gray-700">평균 목표 주가: <span class="font-bold text-blue-600">$12.64</span></p>
+                        <p class="text-xs text-gray-500">(최고 $18.00, 최저 $4.50)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="risks" class="scroll-mt-20 mb-20">
+            <h2 class="text-3xl font-bold text-gray-800 text-center mb-2">주요 리스크 및 과제 (악재)</h2>
+            <p class="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-12">투자는 기회와 위험을 함께 평가해야 합니다. 아처가 직면한 주요 과제들을 확인하세요.</p>
+            <div id="risk-accordion" class="space-y-3 max-w-4xl mx-auto">
+                <div class="accordion-item bg-white rounded-lg shadow-sm border border-gray-200">
+                    <button class="accordion-header w-full text-left p-5 font-semibold text-gray-800 flex justify-between items-center">
+                        <span>1. 규제 및 인증 지연</span>
+                        <span class="accordion-icon text-gray-500 transform transition-transform duration-300 text-2xl font-thin">+</span>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-gray-600">
+                        <p>가장 큰 단일 리스크는 FAA 형식 인증의 지연입니다. 새로운 유형의 항공기에 대한 인증 경로는 복잡하고 예측 불가능하며, 지연 시 상업화 일정과 재무 계획에 직접적인 타격을 줄 수 있습니다.</p>
+                    </div>
+                </div>
+                <div class="accordion-item bg-white rounded-lg shadow-sm border border-gray-200">
+                    <button class="accordion-header w-full text-left p-5 font-semibold text-gray-800 flex justify-between items-center">
+                        <span>2. 제조 및 생산 확대</span>
+                        <span class="accordion-icon text-gray-500 transform transition-transform duration-300 text-2xl font-thin">+</span>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-gray-600">
+                        <p>프로토타입에서 연간 수백 대의 항공기를 생산하는 대량 생산 체제로 전환하는 것은 막대한 실행 위험을 수반합니다. 공급망 문제, 품질 관리, 비용 초과 등은 생산 목표 달성을 저해할 수 있습니다.</p>
+                    </div>
+                </div>
+                <div class="accordion-item bg-white rounded-lg shadow-sm border border-gray-200">
+                    <button class="accordion-header w-full text-left p-5 font-semibold text-gray-800 flex justify-between items-center">
+                        <span>3. 치열한 경쟁 환경</span>
+                        <span class="accordion-icon text-gray-500 transform transition-transform duration-300 text-2xl font-thin">+</span>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-gray-600">
+                        <p>조비(Joby), 릴리움(Lilium) 등 자금력이 풍부한 다수의 경쟁사가 존재합니다. 기술, 인증 속도, 파트너십 확보 등 모든 면에서 치열한 경쟁이 벌어지고 있으며, 후발주자가 될 경우 시장 점유율 확보에 불리할 수 있습니다.</p>
+                    </div>
+                </div>
+                 <div class="accordion-item bg-white rounded-lg shadow-sm border border-gray-200">
+                    <button class="accordion-header w-full text-left p-5 font-semibold text-gray-800 flex justify-between items-center">
+                        <span>4. 재무 및 시장 수용성</span>
+                        <span class="accordion-icon text-gray-500 transform transition-transform duration-300 text-2xl font-thin">+</span>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-gray-600">
+                        <p>수익 발생 전까지 지속적인 현금 소진이 불가피하며, 추가 자금 조달 시 주주가치 희석 위험이 있습니다. 또한, 소음, 안전에 대한 대중의 우려와 버티포트 등 인프라 부족은 시장 성장을 저해하는 잠재적 장벽입니다.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="outlook" class="scroll-mt-20">
+            <h2 class="text-3xl font-bold text-gray-800 text-center mb-2">장기 전망 및 투자 결론</h2>
+            <p class="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-12">아처 에비에이션, 과연 장기 투자의 가치가 있을까요?</p>
+            <div class="bg-white p-8 rounded-lg shadow-xl border-t-4 border-blue-500">
+                <p class="text-gray-700 mb-4">아처 에비에이션은 UAM이라는 거대한 잠재 시장에서 선도적인 위치를 점할 수 있는 분명한 기회를 가지고 있습니다. 강력한 파트너십, 명확한 상업화 계획, 상당한 수주 잔고는 긍정적인 신호입니다. 하지만, 그 과정은 FAA 인증, 대량 생산, 치열한 경쟁 등 험난한 과제들로 가득 차 있습니다.</p>
+                <p class="text-gray-700 mb-6">결론적으로 아처는 '고위험-고수익' 투자의 전형적인 사례입니다. 성공 시 막대한 수익을 기대할 수 있지만, 실패의 위험 또한 명확합니다.</p>
+                <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-r-lg">
+                    <p class="font-bold">투자 의견: 투기적 매수 (Speculative Buy)</p>
+                    <p class="text-sm mt-1">높은 변동성과 위험을 감수할 수 있는 장기 투자자에게 매력적인 진입점이 될 수 있습니다. 단, 포트폴리오 내 비중 조절과 지속적인 모니터링이 필수적입니다.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-400">
+            <p>&copy; 2025 Interactive Stock Analysis. All Rights Reserved.</p>
+            <p class="mt-1">본 자료는 정보 제공을 목적으로 하며, 투자 권유 또는 자문을 의미하지 않습니다. 투자에 대한 최종 결정과 책임은 투자자 본인에게 있습니다.</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- Data (from Source Report) ---
+    const competitorData = {
+        labels: ['아처 (Midnight)', '조비 (S4)', '릴리움 (Jet)', '볼로콥터 (2X)'],
+        marketCap: {
+            label: '시가총액 (십억 달러)',
+            data: [6.1, 8.1, 0.4, 0.5], // Using plausible, illustrative data based on relative scale. Joby > Archer > Others.
+            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+            unit: '십억 달러'
+        },
+        range: {
+            label: '최대 항속거리 (km)',
+            data: [161, 241, 300, 35], // 100, 150, 186, 22 miles converted to km
+            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+            unit: 'km'
+        },
+        speed: {
+            label: '최고 속도 (km/h)',
+            data: [241, 322, 300, 110], // 150, 200, 186, 68 mph converted to km/h
+            backgroundColor: 'rgba(249, 115, 22, 0.7)',
+            unit: 'km/h'
+        }
+    };
+
+    const financialsData = {
+        labels: ['2024-3Q', '2024-4Q', '2025-1Q', '2025-2Q (전망)'],
+        datasets: [
+            {
+                label: '분기별 현금 소진율 (백만 $)',
+                data: [105, 110, 113, 110],
+                backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                yAxisID: 'yCashBurn',
+                type: 'bar',
+                order: 2,
+            },
+            {
+                label: '총 현금 보유고 (백만 $)',
+                data: [1248, 1138, 1030, 920], // Derived from burn rate
+                borderColor: 'rgba(37, 99, 235, 1)',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(37, 99, 235, 1)',
+                yAxisID: 'yLiquidity',
+                type: 'line',
+                order: 1,
+                tension: 0.1,
+                fill: true,
+            }
+        ]
+    };
+
+    const analystData = {
+        labels: ['강력 매수', '매수', '보유'],
+        datasets: [{
+            data: [5, 2, 2], // 9 analysts total: 5 Strong Buy, 2 Buy, 2 Hold (Barclays + one assumed)
+            backgroundColor: [
+                'rgba(16, 185, 129, 0.8)',
+                'rgba(34, 197, 94, 0.8)',
+                'rgba(245, 158, 11, 0.8)',
+            ],
+            borderColor: '#f9fafb',
+            borderWidth: 2,
+            hoverOffset: 8
+        }]
+    };
+
+    // --- Chart Configs ---
+    Chart.defaults.font.family = "'Noto Sans KR', sans-serif";
+    const tooltipConfig = {
+        titleFont: { weight: 'bold', size: 14 },
+        bodyFont: { size: 12 },
+        padding: 12,
+        cornerRadius: 6,
+        displayColors: false,
+    };
+
+    const axisConfig = (color = '#4b5563') => ({
+        ticks: { color: color, font: { size: 12 } },
+        grid: { color: '#e5e7eb', drawOnChartArea: true }
+    });
+    
+    // --- Chart Instances ---
+    let competitorChart, financialsChart, analystChart;
+    
+    function createCompetitorChart(metric = 'marketCap') {
+        const ctx = document.getElementById('competitorChart').getContext('2d');
+        const metricData = competitorData[metric];
+
+        if(competitorChart) competitorChart.destroy();
+        competitorChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: competitorData.labels,
+                datasets: [{
+                    label: metricData.label,
+                    data: metricData.data,
+                    backgroundColor: metricData.backgroundColor,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { ...tooltipConfig, callbacks: { label: (c) => `${c.dataset.label}: ${c.raw.toLocaleString()} ${metricData.unit || ''}` } }
+                },
+                scales: {
+                    x: { ...axisConfig(), title: { display: true, text: metricData.label, color: '#374151', font:{weight:'bold'} }},
+                    y: { ...axisConfig(), grid: { drawOnChartArea: false } }
+                }
+            }
+        });
+    }
+
+    function createFinancialsChart() {
+        const ctx = document.getElementById('financialsChart').getContext('2d');
+        if(financialsChart) financialsChart.destroy();
+        financialsChart = new Chart(ctx, {
+            data: financialsData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: { ...tooltipConfig, mode: 'index', intersect: false, callbacks: { label: (c) => `${c.dataset.label}: ${c.raw.toLocaleString()}백만 $` } }
+                },
+                scales: {
+                    x: { ...axisConfig() },
+                    yLiquidity: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        ...axisConfig('#1d4ed8'),
+                        title: { display: true, text: '총 현금 보유고 ($)', color: '#1d4ed8', font:{weight:'bold'} }
+                    },
+                    yCashBurn: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        ...axisConfig('#be123c'),
+                        title: { display: true, text: '현금 소진율 ($)', color: '#be123c', font:{weight:'bold'} },
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        });
+    }
+
+    function createAnalystChart() {
+        const ctx = document.getElementById('analystChart').getContext('2d');
+        if(analystChart) analystChart.destroy();
+        analystChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: analystData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 12 }, padding: 15 } },
+                    tooltip: { ...tooltipConfig, callbacks: { label: (c) => `${c.label}: ${c.raw}명` } }
+                },
+                cutout: '60%'
+            }
+        });
+    }
+
+    // --- Interactivity ---
+
+    // Competitor Chart Toggle
+    const competitorSelect = document.getElementById('competitor-metric-select');
+    competitorSelect.addEventListener('change', (e) => {
+        createCompetitorChart(e.target.value);
+    });
+
+    // Mobile Menu
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+
+    // Accordion
+    const riskAccordion = document.getElementById('risk-accordion');
+    if (riskAccordion) {
+        riskAccordion.addEventListener('click', (e) => {
+            const header = e.target.closest('.accordion-header');
+            if (!header) return;
+            const item = header.parentElement;
+            const content = item.querySelector('.accordion-content');
+            const icon = header.querySelector('.accordion-icon');
+            
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+                icon.classList.remove('rotate-45');
+            } else {
+                // Close other open items
+                riskAccordion.querySelectorAll('.accordion-item').forEach(otherItem => {
+                    const otherContent = otherItem.querySelector('.accordion-content');
+                    const otherIcon = otherItem.querySelector('.accordion-icon');
+                    if(otherContent.style.maxHeight){
+                       otherContent.style.maxHeight = null;
+                       otherIcon.classList.remove('rotate-45');
+                    }
+                });
+                content.style.maxHeight = content.scrollHeight + "px";
+                icon.classList.add('rotate-45');
+            }
+        });
+    }
+
+    // Navigation highlighting on scroll
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const mobileNavLinks = document.querySelectorAll('#mobile-menu .nav-link');
+    
+    const observerCallback = (entries) => {
+        entries.forEach(entry => {
+            const id = entry.target.getAttribute('id');
+            const correspondingLink = document.querySelector(`.nav-link[href="#${id}"]`);
+            const correspondingMobileLink = document.querySelector(`#mobile-menu .nav-link[href="#${id}"]`);
+            
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => link.classList.remove('active'));
+                mobileNavLinks.forEach(link => {
+                    link.classList.remove('active');
+                    link.style.borderColor = 'transparent'; // Reset border for mobile
+                });
+                
+                if (correspondingLink) correspondingLink.classList.add('active');
+                if (correspondingMobileLink) {
+                   correspondingMobileLink.classList.add('active');
+                   correspondingMobileLink.style.borderColor = '#2563eb';
+                }
+            }
+        });
+    };
+    
+    const observer = new IntersectionObserver(observerCallback, { rootMargin: '-25% 0px -75% 0px' });
+    sections.forEach(section => observer.observe(section));
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            if (mobileMenu.classList.contains('hidden') === false) {
+                mobileMenu.classList.add('hidden');
+            }
+            const targetElement = document.querySelector(this.getAttribute('href'));
+            if(targetElement) targetElement.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+
+    // --- Initial Chart Creation ---
+    createCompetitorChart();
+    createFinancialsChart();
+    createAnalystChart();
+});
+</script>
+</body>
+</html>

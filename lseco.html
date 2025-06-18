@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LS에코에너지 대화형 심층 분석 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Eco Green & Corporate Blue with Neutral Grays -->
+    <!-- Application Structure Plan: The dashboard uses a narrative-driven, top-down approach. It starts with a high-level investment thesis ("Quantum Summary"), then introduces the company's core transformation ("Growth Engines"). This is followed by a deep dive into supporting data: "Financial Health," "Market Environment," and "Technical Chart." The journey concludes with the most critical part for a trader: "Actionable Trading Strategies." This structure guides users from 'What' and 'Why' to 'How,' making complex information digestible and decision-oriented. -->
+    <!-- Visualization & Content Choices:
+        - Core Business & Growth Engines: Goal: Organize. Viz: Side-by-side cards. Interaction: None. Justification: Clearly contrasts the stable core business with the high-growth new ventures, which is the central theme of the report. Method: HTML/Tailwind.
+        - Financial Performance (Revenue/Profit): Goal: Compare. Viz: Bar Chart. Interaction: Tooltip. Justification: Effectively shows the recovery and growth trajectory after a temporary dip. Library: Chart.js.
+        - Technical Analysis: Goal: Change/Relationships. Viz: Line Chart with annotated support/resistance zones. Interaction: Tooltip. Justification: Provides a clear visual guide for entry and exit points, which is crucial for a trading-focused report. Library: Chart.js with Annotation Plugin.
+        - Macro Factors: Goal: Organize/Inform. Viz: Icon-based cards. Interaction: None. Justification: Makes abstract concepts like 'Energy Transition' immediately understandable and visually appealing. Method: HTML/Tailwind.
+        - Trading Strategy: Goal: Inform/Action. Viz: Persona-based cards for "Aggressive" vs. "Conservative" investors. Interaction: None. Justification: Delivers tailored, clear, and actionable advice, which is the ultimate goal of the analysis. Method: HTML/Tailwind.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8f9fa; color: #343a40; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 350px; max-height: 45vh; }
+        @media (max-width: 768px) { .chart-container { height: 300px; } }
+        .nav-link { transition: color 0.3s, border-bottom-color 0.3s; }
+        .nav-link.active { color: #10b981; border-bottom-color: #10b981; font-weight: 700; }
+        .stat-card { background-color: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05); transition: transform 0.3s, box-shadow 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05); }
+        .section-title { font-size: 2rem; font-weight: 700; text-align: center; margin-bottom: 2.5rem; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/90 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="text-xl font-bold text-gray-800">Quantum Trader: LS에코에너지</div>
+                <div class="hidden md:flex items-center space-x-8 font-medium text-gray-600">
+                    <a href="#summary" class="nav-link border-b-2 border-transparent pb-1">핵심 요약</a>
+                    <a href="#growth" class="nav-link border-b-2 border-transparent pb-1">성장 동력</a>
+                    <a href="#financials" class="nav-link border-b-2 border-transparent pb-1">재무 분석</a>
+                    <a href="#technicals" class="nav-link border-b-2 border-transparent pb-1">기술적 분석</a>
+                    <a href="#strategy" class="nav-link border-b-2 border-transparent pb-1">투자 전략</a>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="bg-gray-200 rounded p-2 text-sm">
+                        <option value="#summary">핵심 요약</option>
+                        <option value="#growth">성장 동력</option>
+                        <option value="#financials">재무 분석</option>
+                        <option value="#technicals">기술적 분석</option>
+                        <option value="#strategy">투자 전략</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="hero" class="text-center py-12 md:py-16">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">LS에코에너지 심층 분석</h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">에너지 전환 시대의 핵심 수혜주, LS에코에너지의 성장 잠재력과 투자 전략을 분석합니다.</p>
+        </section>
+
+        <section id="summary" class="py-12 scroll-mt-20">
+            <h2 class="section-title">퀀텀 요약: 투자 의견 및 핵심 현황</h2>
+            <div class="text-center mb-12 max-w-3xl mx-auto">
+                 <p class="text-lg bg-gray-100 p-6 rounded-lg">중장기적 <span class="font-bold text-green-600">'긍정적'</span>, 단기적 <span class="font-bold text-yellow-500">'변동성 확대'</span> 유의</p>
+                <p class="mt-4 text-gray-600">안정적인 기존 사업에 '해저케이블'과 '희토류'라는 강력한 신성장 동력을 장착, 기업 가치 재평가가 기대되는 시점입니다. 다만, 단기 급등에 따른 변동성과 신사업의 성과 도출까지는 시간이 필요합니다.</p>
+            </div>
+        </section>
+
+        <section id="growth" class="py-12 scroll-mt-20">
+            <h2 class="section-title">핵심 성장 동력: 두 개의 날개</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="stat-card p-6 lg:col-span-1">
+                     <div class="flex items-center justify-center mb-4"><span class="text-4xl">⚡</span></div>
+                    <h3 class="text-xl font-bold text-center mb-3">안정적 캐시카우: 전선 사업</h3>
+                    <p class="text-gray-600 text-sm">베트남 1위 종합 전선 기업. 베트남의 경제 성장과 전력 인프라 투자 확대로 안정적인 수익 기반 역할을 합니다.</p>
+                </div>
+                <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="stat-card p-6 bg-blue-50 border-l-4 border-blue-500">
+                        <div class="flex items-center justify-center mb-4"><span class="text-4xl">🌊</span></div>
+                        <h3 class="text-xl font-bold text-center mb-3">신성장 동력 1: 해저케이블</h3>
+                        <p class="text-gray-600 text-sm">해상풍력 등 에너지 전환의 핵심 인프라. 유럽, 동남아 등 대규모 수주로 성장 기대감을 높이고 있습니다.</p>
+                    </div>
+                     <div class="stat-card p-6 bg-green-50 border-l-4 border-green-500">
+                         <div class="flex items-center justify-center mb-4"><span class="text-4xl">💎</span></div>
+                        <h3 class="text-xl font-bold text-center mb-3">신성장 동력 2: 희토류</h3>
+                        <p class="text-gray-600 text-sm">탈중국 공급망의 전략적 요충지. 베트남의 풍부한 매장량을 기반으로 사업을 추진하며 전략적 가치가 부각됩니다.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="financials" class="py-12 scroll-mt-20">
+            <h2 class="section-title">재무 분석: 성장성과 가치평가</h2>
+             <div class="text-center mb-12 max-w-3xl mx-auto">
+                <p class="text-gray-600">안정적인 매출 성장과 뚜렷한 수익성 개선 흐름을 보이고 있습니다. 신사업 투자가 본격화되며 미래 성장을 위한 자산 증가가 예상됩니다. 차트를 통해 성장 궤도를 확인하세요.</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-xl font-bold mb-4 text-center">매출 및 영업이익 추이 (억원)</h3>
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+                <div class="mt-6 text-center text-sm text-gray-500">
+                    <p>2023년 일시적 둔화 후 2024년부터 성장 궤도 재진입, 2025년 1분기 사상 최대 실적 달성</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="technicals" class="py-12 scroll-mt-20">
+            <h2 class="section-title">기술적 분석: 현재 주가 위치는?</h2>
+            <div class="text-center mb-12 max-w-3xl mx-auto">
+                 <p class="text-gray-600">가파른 상승 후 기간 조정 양상을 보이고 있습니다. 중장기 상승 추세는 유효하나, 단기적으로는 주요 지지선에서의 방어 여부가 향후 방향성을 결정할 핵심 변수입니다.</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-xl font-bold mb-4 text-center">주가 추세 및 주요 지지/저항선 (원)</h3>
+                <div class="chart-container">
+                    <canvas id="priceChart"></canvas>
+                </div>
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div>
+                        <p class="text-sm text-gray-500">1차 지지선</p>
+                        <p class="font-bold text-lg text-blue-700">32,000 ~ 33,000</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">1차 저항선</p>
+                        <p class="font-bold text-lg text-red-600">38,000 ~ 40,000</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">RSI (상대강도지수)</p>
+                        <p class="font-bold text-lg text-gray-700">중립 구간 진입</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="strategy" class="py-12 scroll-mt-20">
+            <h2 class="section-title">최종 투자 전략</h2>
+             <div class="text-center mb-12 max-w-3xl mx-auto">
+                <p class="text-gray-600">모든 분석을 종합하여 투자 성향에 따른 맞춤형 매매 시나리오와 리스크 관리 방안을 제시합니다. 변동성을 기회로 활용하는 전략적 접근이 필요합니다.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="stat-card bg-sky-50 border-l-4 border-sky-500 p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-sky-800">보수적인 투자자</h3>
+                    <p class="text-gray-700 mb-4 text-sm">안정성을 중시하며, 지지선 확인 후 진입을 노리는 전략입니다.</p>
+                    <div class="space-y-3 text-sm">
+                        <p><strong class="text-sky-700">매수 타이밍:</strong> 1차 지지선(<span class="font-mono">32,000~33,000</span>원) 지지 확인 또는 20일 이평선 돌파 시점.</p>
+                        <p><strong class="text-sky-700">매도 전략:</strong> 1차 저항선(<span class="font-mono">38,000~40,000</span>원)에서 분할 익절. 펀더멘털 변화 없으면 장기 보유.</p>
+                        <p><strong class="text-sky-700">리스크 관리:</strong> 장기 추세선 이탈 시(<span class="font-mono">~27,500</span>원) 비중 축소.</p>
+                    </div>
+                </div>
+                <div class="stat-card bg-red-50 border-l-4 border-red-500 p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-red-800">공격적인 투자자</h3>
+                    <p class="text-gray-700 mb-4 text-sm">변동성을 활용하여 분할 매수로 접근하는 전략입니다.</p>
+                    <div class="space-y-3 text-sm">
+                        <p><strong class="text-red-700">매수 타이밍:</strong> 현재가(<span class="font-mono">~35,000</span>원)부터 분할 매수 시작. 2차 지지선(<span class="font-mono">~28,000</span>원) 근접 시 비중 확대 기회.</p>
+                        <p><strong class="text-red-700">매도 전략:</strong> 단기 목표가 <span class="font-mono">38,000~40,000</span>원. 신고가 경신 시 추세 추종.</p>
+                        <p><strong class="text-red-700">손절 라인:</strong> <span class="font-mono">27,500</span>원 이탈 시 손절로 리스크 관리.</p>
+                    </div>
+                </div>
+            </div>
+             <div class="mt-12 text-center p-6 bg-white rounded-lg shadow-md">
+                <h4 class="font-bold text-xl mb-3 text-gray-800">핵심 모니터링 포인트</h4>
+                <p class="text-gray-600 max-w-2xl mx-auto">① 글로벌 경기 및 전력 인프라 투자 동향, ② 구리 등 원자재 가격, ③ 해저케이블/희토류 사업의 구체적인 계약 뉴스, ④ 기관/외국인 수급 동향.</p>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-gray-800 text-white text-center py-6 mt-12">
+        <p class="text-sm">본 자료는 정보 제공을 목적으로 하며, 투자 권유나 추천이 아닙니다.</p>
+        <p class="text-sm">모든 투자의 최종 책임은 투자자 본인에게 있습니다.</p>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const mobileNav = document.getElementById('mobile-nav');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.getAttribute('id');
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+                });
+                if (mobileNav.value !== `#${id}`) {
+                    mobileNav.value = `#${id}`;
+                }
+            }
+        });
+    }, { rootMargin: "-40% 0px -60% 0px" });
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+    
+    mobileNav.addEventListener('change', (e) => {
+        const targetId = e.target.value;
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+             targetElement.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(revenueCtx, {
+        type: 'bar',
+        data: {
+            labels: ['2022년', '2023년', '2024년(E)'],
+            datasets: [{
+                label: '매출액',
+                data: [8185, 7311, 8690],
+                backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 1
+            }, {
+                label: '영업이익',
+                data: [275, 296, 448],
+                backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                borderColor: 'rgba(16, 185, 129, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw.toLocaleString()} 억원` } } },
+            scales: { y: { ticks: { callback: (v) => `${v.toLocaleString()}` } } }
+        }
+    });
+    
+    const priceCtx = document.getElementById('priceChart').getContext('2d');
+    new Chart(priceCtx, {
+        type: 'line',
+        data: {
+            labels: ['4월말', '5월초', '5월중순(고점)', '5월말', '6월초', '현재'],
+            datasets: [{
+                label: '주가',
+                data: [35000, 42000, 50100, 41000, 36000, 34500],
+                borderColor: '#1f2937',
+                backgroundColor: 'rgba(31, 41, 55, 0.1)',
+                tension: 0.1,
+                fill: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: (c) => `주가: ${c.raw.toLocaleString()} 원` } },
+                annotation: {
+                    annotations: {
+                        resistance: {
+                            type: 'box',
+                            yMin: 38000,
+                            yMax: 40000,
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderColor: 'rgba(239, 68, 68, 0.5)',
+                            borderWidth: 1,
+                            borderDash: [6, 6],
+                            label: { content: '1차 저항 구간', position: 'start', font: {size: 10}, color: 'red'}
+                        },
+                        support: {
+                            type: 'box',
+                            yMin: 32000,
+                            yMax: 33000,
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderColor: 'rgba(59, 130, 246, 0.5)',
+                            borderWidth: 1,
+                            borderDash: [6, 6],
+                             label: { content: '1차 지지 구간', position: 'end', font: {size: 10}, color: 'blue'}
+                        }
+                    }
+                }
+            },
+            scales: { y: { ticks: { callback: (v) => `${v.toLocaleString()}` } } }
+        }
+    });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아처 에비에이션(ACHR) 대화형 심층 분석 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Tech Blue & Deep Gray with Accent Colors -->
+    <!-- Application Structure Plan: The dashboard is designed to guide the investor from the big picture to actionable details. 1. A "Hero" section with the current price and overall thesis. 2. "Investment Summary" stat cards for a rapid overview of the opportunity. 3. "Core Competitive Edge" to explain WHY Archer is a leader (FAA, Partners, Funding). 4. "Financial Runway Analysis" - a custom chart showing cash vs. burn rate, which is the most critical financial metric for a pre-revenue company. 5. "Technical Analysis" with a clear chart of key price levels. 6. Finally, "Actionable Trading Strategies" tailored for different risk profiles. This structure answers the what, why, when, and how of investing in ACHR. -->
+    <!-- Visualization & Content Choices:
+        - Investment Thesis: Goal: Inform. Viz: Stat cards for Potential, Risk, and Financial Stability. Justification: Quickly frames the investment for the user. Method: HTML/Tailwind.
+        - Core Strengths: Goal: Organize. Viz: Icon-driven cards. Justification: Visually breaks down the key competitive advantages (FAA, Partners, Funding). Method: HTML/Tailwind.
+        - Financial Chart: Goal: Analyze Change. Viz: A combined Bar/Line chart showing Operating Loss (burn rate) vs. Cash on Hand (runway). Justification: This is the most vital financial story for a startup like Archer, far more insightful than just showing losses. Library: Chart.js.
+        - Technical Analysis Chart: Goal: Analyze Price Action. Viz: Line chart with annotated support/resistance boxes. Justification: Provides traders with a clear visual map for entry/exit points. Library: Chart.js with Annotation Plugin.
+        - Trading Strategy: Goal: Action. Viz: Persona-based cards for "Aggressive" vs. "Stable" investors. Justification: Delivers clear, risk-differentiated advice, making the report highly practical. Method: HTML/Tailwind.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f7f8fa; color: #333; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 400px; max-height: 50vh; }
+        @media (max-width: 768px) { .chart-container { height: 320px; } }
+        .nav-link { transition: color 0.3s, border-bottom-color 0.3s; }
+        .nav-link.active { color: #007aff; border-bottom-color: #007aff; font-weight: 700; }
+        .stat-card { background-color: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 4px 15px -1px rgb(0 0 0 / 0.06); transition: transform 0.3s, box-shadow 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -3px rgb(0 0 0 / 0.1); }
+        .section-title { font-size: 2.25rem; font-weight: 700; text-align: center; margin-bottom: 3rem; color: #1a202c; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/90 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="text-xl font-bold text-gray-800">Quantum Trader: Archer (ACHR)</div>
+                <div class="hidden md:flex items-center space-x-8 font-medium text-gray-600">
+                    <a href="#summary" class="nav-link border-b-2 border-transparent pb-1">투자 요약</a>
+                    <a href="#core" class="nav-link border-b-2 border-transparent pb-1">핵심 경쟁력</a>
+                    <a href="#financials" class="nav-link border-b-2 border-transparent pb-1">재무 분석</a>
+                    <a href="#technicals" class="nav-link border-b-2 border-transparent pb-1">기술적 분석</a>
+                    <a href="#strategy" class="nav-link border-b-2 border-transparent pb-1">투자 전략</a>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="bg-gray-200 rounded p-2 text-sm w-full">
+                        <option value="#summary">투자 요약</option>
+                        <option value="#core">핵심 경쟁력</option>
+                        <option value="#financials">재무 분석</option>
+                        <option value="#technicals">기술적 분석</option>
+                        <option value="#strategy">투자 전략</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="hero" class="text-center py-12 md:py-16">
+            <p class="text-gray-500 text-sm">2025년 6월 18일 기준</p>
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 my-2">아처 에비에이션(ACHR) 심층 분석</h1>
+            <p class="text-2xl text-gray-800">현재가: <span class="font-bold text-blue-600">$9.905</span></p>
+        </section>
+
+        <section id="summary" class="py-12 scroll-mt-20">
+            <h2 class="section-title">종합 투자 요약</h2>
+            <div class="text-center mb-12 max-w-3xl mx-auto">
+                 <p class="text-lg bg-white p-6 rounded-lg shadow-md">높은 변동성 속 <span class="font-bold text-green-600">'장기 성장 잠재력'</span>, 조정 시 <span class="font-bold text-blue-500">'분할 매수'</span> 전략 유효</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="stat-card text-center">
+                    <h3 class="text-lg font-semibold text-gray-500 mb-2">성장 잠재력</h3>
+                    <p class="text-3xl font-bold text-green-600">매우 높음</p>
+                    <p class="text-sm text-gray-500 mt-2">UAM 시장 '퍼스트 무버'의 기회</p>
+                </div>
+                <div class="stat-card text-center">
+                    <h3 class="text-lg font-semibold text-gray-500 mb-2">현재 리스크</h3>
+                    <p class="text-3xl font-bold text-red-600">매우 높음</p>
+                    <p class="text-sm text-gray-500 mt-2">매출 '0', 규제/상용화 불확실성</p>
+                </div>
+                <div class="stat-card text-center">
+                    <h3 class="text-lg font-semibold text-gray-500 mb-2">재무 안정성</h3>
+                    <p class="text-3xl font-bold text-blue-600">우수</p>
+                    <p class="text-sm text-gray-500 mt-2">대규모 자금 확보로 상용화까지의 '버팀목' 마련</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="core" class="py-12 scroll-mt-20 bg-gray-50 rounded-xl">
+            <h2 class="section-title">핵심 경쟁력: 시장 선점을 위한 삼각편대</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="stat-card p-6">
+                     <div class="flex items-center justify-center mb-4"><span class="text-5xl">✈️</span></div>
+                    <h3 class="text-xl font-bold text-center mb-3">FAA 인증 순항</h3>
+                    <p class="text-gray-600 text-sm">경쟁사 대비 미국 연방항공청(FAA) 인증 절차에서 앞서나가며 2025년 상용화 목표. 시장 선점 효과가 기대되는 가장 강력한 무기입니다.</p>
+                </div>
+                <div class="stat-card p-6">
+                    <div class="flex items-center justify-center mb-4"><span class="text-5xl">🤝</span></div>
+                    <h3 class="text-xl font-bold text-center mb-3">강력한 파트너십</h3>
+                    <p class="text-gray-600 text-sm">스텔란티스(생산), 유나이티드 항공(구매/노선), LA28 올림픽(공식 파트너) 등과의 협력은 기술력과 사업성의 보증수표입니다.</p>
+                </div>
+                <div class="stat-card p-6">
+                     <div class="flex items-center justify-center mb-4"><span class="text-5xl">💰</span></div>
+                    <h3 class="text-xl font-bold text-center mb-3">풍부한 자금력</h3>
+                    <p class="text-gray-600 text-sm">최근 대규모 자금 조달 성공으로 상용화까지 필요한 운영 자금을 안정적으로 확보. 경쟁사 대비 재무적 우위를 점하고 있습니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="financials" class="py-12 scroll-mt-20">
+            <h2 class="section-title">재무 분석: 상용화까지의 활주로</h2>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-xl font-bold mb-4 text-center">현금 보유고 vs 영업손실 (백만 달러)</h3>
+                <div class="chart-container">
+                    <canvas id="financialChart"></canvas>
+                </div>
+                <p class="text-center mt-4 text-sm text-gray-600">영업손실(비용)이 지속되고 있으나, 풍부한 현금 보유량(활주로)을 바탕으로 상용화까지 버틸 체력을 확보한 점이 핵심입니다.</p>
+            </div>
+        </section>
+        
+        <section id="technicals" class="py-12 scroll-mt-20">
+            <h2 class="section-title">기술적 분석: 과열 해소 및 지지선 테스트</h2>
+            <div class="bg-white p-6 rounded-lg shadow-xl">
+                <h3 class="text-xl font-bold mb-4 text-center">ACHR 주가 추세 및 주요 구간 (USD)</h3>
+                <div class="chart-container">
+                    <canvas id="priceChart"></canvas>
+                </div>
+                <p class="text-center mt-4 text-sm text-gray-600">단기 과열을 해소하는 조정 국면. 주요 지지선에서 반등 여부가 향후 방향성을 결정할 것입니다.</p>
+            </div>
+        </section>
+
+        <section id="strategy" class="py-12 scroll-mt-20">
+            <h2 class="section-title">최종 트레이딩 전략</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="stat-card bg-sky-50 border-l-4 border-sky-500 p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-sky-800">안정적 투자자</h3>
+                    <p class="text-gray-700 mb-4 text-sm">리스크를 최소화하며, 의미 있는 신호 발생 시 진입하는 전략입니다.</p>
+                    <div class="space-y-3 text-sm">
+                        <p><strong class="text-sky-700">매수 타이밍:</strong> 2차 지지선(<span class="font-mono">$8.00~$8.50</span>) 도달 시 또는 FAA 최종 인증 등 핵심 뉴스 발생 시 진입.</p>
+                        <p><strong class="text-sky-700">매도 전략:</strong> 1차 저항선(<span class="font-mono">$12.00</span>)에서 일부 익절. 나머지는 상용화까지 장기 보유.</p>
+                    </div>
+                </div>
+                <div class="stat-card bg-red-50 border-l-4 border-red-500 p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-red-800">공격적 투자자</h3>
+                    <p class="text-gray-700 mb-4 text-sm">조정 구간을 분할 매수 기회로 활용하는 전략입니다.</p>
+                    <div class="space-y-3 text-sm">
+                        <p><strong class="text-red-700">매수 타이밍:</strong> 현재가부터 1차 지지선(<span class="font-mono">$9.50</span>) 부근에서 분할 매수 시작.</p>
+                        <p><strong class="text-red-700">매도 전략:</strong> 단기 목표가 <span class="font-mono">$12.00</span>. 신고가($13.92) 경신 시 추세 추종.</p>
+                    </div>
+                </div>
+            </div>
+             <div class="mt-12 text-center p-6 bg-white rounded-lg shadow-md">
+                <h4 class="font-bold text-xl mb-3 text-gray-800">필수 리스크 관리</h4>
+                <p class="text-gray-600 max-w-2xl mx-auto">고위험-고수익 종목이므로 전체 포트폴리오의 <span class="font-bold">5~10% 이내</span>로 비중을 제한하고, 장기 추세 이탈 신호인 <span class="font-bold font-mono">$7.50</span> 하회 시 비중 축소를 고려해야 합니다.</p>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-gray-800 text-white text-center py-6 mt-12">
+        <p class="text-sm">본 자료는 정보 제공을 목적으로 하며, 특정 종목에 대한 투자 추천이나 권유가 아닙니다.</p>
+        <p class="text-sm">모든 투자의 최종 책임은 투자자 본인에게 있습니다.</p>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const mobileNav = document.getElementById('mobile-nav');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.getAttribute('id');
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+                });
+                if (mobileNav.value !== `#${id}`) {
+                    mobileNav.value = `#${id}`;
+                }
+            }
+        });
+    }, { rootMargin: "-40% 0px -60% 0px" });
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+    
+    mobileNav.addEventListener('change', (e) => {
+        const targetId = e.target.value;
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+             targetElement.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+    const financialCtx = document.getElementById('financialChart').getContext('2d');
+    new Chart(financialCtx, {
+        type: 'bar',
+        data: {
+            labels: ['2022년', '2023년', '2024년(TTM)', '2025년 1분기'],
+            datasets: [
+            {
+                label: '영업손실',
+                data: [-336.6, -444.8, -509.7, -144.0],
+                backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                borderColor: 'rgba(239, 68, 68, 1)',
+                yAxisID: 'y'
+            },
+            {
+                type: 'line',
+                label: '현금 및 현금성자산',
+                data: [534, 464.6, 841.3, 1030.4],
+                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                yAxisID: 'y1',
+                tension: 0.1,
+                fill: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            plugins: { tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw.toLocaleString()}` } } },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: '영업손실 (백만$)'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                     title: {
+                        display: true,
+                        text: '현금 보유고 (백만$)'
+                    },
+                    grid: {
+                        drawOnChartArea: false, 
+                    },
+                },
+            }
+        }
+    });
+    
+    const priceCtx = document.getElementById('priceChart').getContext('2d');
+    new Chart(priceCtx, {
+        type: 'line',
+        data: {
+            labels: ['3월', '4월', '5월', '5월말', '6월초', '현재'],
+            datasets: [{
+                label: 'ACHR 주가',
+                data: [8.5, 11.0, 12.5, 13.92, 11.5, 9.905],
+                borderColor: '#007aff',
+                backgroundColor: 'rgba(0, 122, 255, 0.1)',
+                tension: 0.1,
+                fill: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: (c) => `주가: $${c.raw.toLocaleString()}` } },
+                annotation: {
+                    annotations: {
+                        resistance1: {
+                            type: 'box',
+                            yMin: 12.00,
+                            yMax: 12.50,
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderColor: 'rgba(239, 68, 68, 0.4)',
+                            borderWidth: 1,
+                            borderDash: [6, 6],
+                            label: { content: '1차 저항', position: 'start', font: {size: 10}, color: 'rgba(239, 68, 68, 0.8)'}
+                        },
+                        support1: {
+                            type: 'box',
+                            yMin: 9.50,
+                            yMax: 10.00,
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderColor: 'rgba(59, 130, 246, 0.4)',
+                            borderWidth: 1,
+                            borderDash: [6, 6],
+                             label: { content: '1차 지지', position: 'end', font: {size: 10}, color: 'rgba(59, 130, 246, 0.8)'}
+                        },
+                        support2: {
+                            type: 'box',
+                            yMin: 8.00,
+                            yMax: 8.50,
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderColor: 'rgba(59, 130, 246, 0.4)',
+                            borderWidth: 1,
+                            borderDash: [6, 6],
+                             label: { content: '2차 지지', position: 'end', font: {size: 10}, color: 'rgba(59, 130, 246, 0.8)'}
+                        }
+                    }
+                }
+            },
+            scales: { y: { ticks: { callback: (v) => `$${v.toFixed(2)}` } } }
+        }
+    });
+});
+</script>
+</body>
+</html>

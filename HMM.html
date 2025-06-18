@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMM 대화형 심층 분석 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Professional Blue & Neutral Gray -->
+    <!-- Application Structure Plan: The dashboard is structured as a top-down analytical journey. It starts with a high-level "Quantum Summary" for quick insights, then dives into fundamentals (Corporate, Financial), external factors (Market, Geopolitical), technical chart patterns, and finally concludes with actionable "Trading Strategies". This logical flow allows both quick glances and deep dives, catering to different user needs within a single, navigable page. -->
+    <!-- Visualization & Content Choices:
+        - Financial Performance (Revenue/Profit): Goal: Compare. Viz: Bar Chart. Interaction: Tooltip. Justification: Shows performance trends clearly. Library: Chart.js.
+        - Financial Health (Debt Ratio): Goal: Change. Viz: Line Chart. Interaction: Tooltip. Justification: Effectively visualizes the dramatic improvement in financial structure. Library: Chart.js.
+        - Geopolitical Impact: Goal: Organize. Viz: Icon-based cards. Interaction: None. Justification: Simplifies complex cause-and-effect relationships for immediate understanding. Method: HTML/Tailwind.
+        - Technical Analysis: Goal: Change/Relationships. Viz: Line Chart with annotations. Interaction: Tooltip for price, hover effects. Justification: Visualizes price action and key support/resistance levels directly on the chart for trading decisions. Library: Chart.js with Annotation Plugin.
+        - Trading Strategy: Goal: Inform. Viz: Persona-based cards for "Aggressive" and "Conservative" investors. Interaction: None. Justification: Provides clear, tailored advice for different user profiles, enhancing actionability. Method: HTML/Tailwind.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f4f7f6; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 350px; max-height: 45vh; }
+        @media (max-width: 768px) { .chart-container { height: 300px; } }
+        .nav-link { transition: color 0.3s, border-bottom-color 0.3s; }
+        .nav-link.active { color: #005b96; border-bottom-color: #005b96; font-weight: 700; }
+        .stat-card { background-color: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05); transition: transform 0.3s, box-shadow 0.3s; border-left: 4px solid transparent; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05); }
+        .stat-card.blue { border-left-color: #3b82f6; }
+        .stat-card.green { border-left-color: #10b981; }
+        .stat-card.yellow { border-left-color: #f59e0b; }
+        .stat-card.red { border-left-color: #ef4444; }
+    </style>
+</head>
+<body class="text-gray-700">
+
+    <header class="bg-white/90 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="text-xl font-bold text-gray-800">Quantum Trader: HMM</div>
+                <div class="hidden md:flex items-center space-x-8 font-medium text-gray-600">
+                    <a href="#summary" class="nav-link border-b-2 border-transparent pb-1">종합 현황</a>
+                    <a href="#financials" class="nav-link border-b-2 border-transparent pb-1">재무 분석</a>
+                    <a href="#market" class="nav-link border-b-2 border-transparent pb-1">시장 분석</a>
+                    <a href="#technicals" class="nav-link border-b-2 border-transparent pb-1">기술적 분석</a>
+                    <a href="#strategy" class="nav-link border-b-2 border-transparent pb-1">투자 전략</a>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="bg-gray-200 rounded p-2 text-sm">
+                        <option value="#summary">종합 현황</option>
+                        <option value="#financials">재무 분석</option>
+                        <option value="#market">시장 분석</option>
+                        <option value="#technicals">기술적 분석</option>
+                        <option value="#strategy">투자 전략</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="hero" class="text-center py-12 md:py-16">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">HMM 심층 분석 및 전망</h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">이란-이스라엘 전쟁 여파 속, 글로벌 해운 시장의 핵심 HMM의 현재와 미래를 분석합니다.</p>
+        </section>
+
+        <section id="summary" class="py-12 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-10">퀀텀 요약: 핵심 현황 대시보드</h2>
+            <div class="text-center mb-12 max-w-3xl mx-auto">
+                <p class="text-gray-600">이 섹션은 HMM의 현재 상황을 한눈에 파악할 수 있는 핵심 지표들을 요약하여 보여줍니다. 단기적 모멘텀부터 펀더멘털, 밸류에이션, 그리고 잠재 리스크까지 신속하게 확인하고 전체 분석의 개요를 잡을 수 있습니다.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="stat-card blue">
+                    <h3 class="text-lg font-semibold text-gray-500 mb-2">단기 모멘텀</h3>
+                    <p class="text-2xl font-bold text-blue-600">매우 강력함</p>
+                    <p class="text-sm text-gray-500 mt-2">중동 리스크 → 해상 운임 급등</p>
+                </div>
+                <div class="stat-card green">
+                    <h3 class="text-lg font-semibold text-gray-500 mb-2">펀더멘털</h3>
+                    <p class="text-2xl font-bold text-green-600">견조함</p>
+                    <p class="text-sm text-gray-500 mt-2">견실한 흑자, 재무구조 대폭 개선</p>
+                </div>
+                <div class="stat-card yellow">
+                    <h3 class="text-lg font-semibold text-gray-500 mb-2">밸류에이션</h3>
+                    <p class="text-2xl font-bold text-yellow-500">저평가 상태</p>
+                    <p class="text-sm text-gray-500 mt-2">PBR 0.76, 업계 대비 매력도 보유</p>
+                </div>
+                <div class="stat-card red">
+                    <h3 class="text-lg font-semibold text-gray-500 mb-2">핵심 리스크</h3>
+                    <p class="text-2xl font-bold text-red-500">경기 변동성</p>
+                    <p class="text-sm text-gray-500 mt-2">전쟁 장기화, 글로벌 교역 둔화 우려</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="financials" class="py-12 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-10">재무 분석: 성장성과 안정성</h2>
+            <div class="text-center mb-12 max-w-3xl mx-auto">
+                <p class="text-gray-600">HMM의 재무 건전성을 동적 차트와 핵심 비율을 통해 분석합니다. 폭발적인 성장 이후 안정적인 흑자 기조를 유지하는 모습과 극적으로 개선된 재무 구조를 시각적으로 확인할 수 있습니다.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-bold mb-4 text-center">매출 및 영업이익 추이 (조원)</h3>
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-bold mb-4 text-center">부채비율 변화 (%)</h3>
+                    <div class="chart-container">
+                        <canvas id="debtRatioChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="market" class="py-12 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-10">시장 분석: 전쟁과 여론</h2>
+            <div class="text-center mb-12 max-w-3xl mx-auto">
+                <p class="text-gray-600">이란-이스라엘 전쟁이 해운 시장에 미치는 영향을 집중 분석합니다. 운임 상승, 유가 변동 등 거시적 요인과 시장의 긍정적, 부정적 여론을 통해 HMM을 둘러싼 외부 환경을 이해합니다.</p>
+            </div>
+            <div class="bg-white p-8 rounded-lg shadow-lg">
+                <h3 class="text-2xl font-bold text-center mb-6">이란-이스라엘 전쟁의 파급 효과</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <div>
+                        <div class="text-5xl mb-2">📈</div>
+                        <h4 class="font-bold text-lg">해운 운임 상승</h4>
+                        <p class="text-sm text-gray-600">호르무즈 해협 긴장 고조 → 우회 항로 선택 → 운항 비용 증가</p>
+                    </div>
+                    <div>
+                        <div class="text-5xl mb-2">⛽</div>
+                        <h4 class="font-bold text-lg">유가 변동성 확대</h4>
+                        <p class="text-sm text-gray-600">중동 불안정으로 유가 상승. 운임 상승폭이 더 클 경우 수익성 개선</p>
+                    </div>
+                    <div>
+                        <div class="text-5xl mb-2">🌐</div>
+                        <h4 class="font-bold text-lg">글로벌 공급망 혼란</h4>
+                        <p class="text-sm text-gray-600">군사적 긴장 → 공급망 차질 → 해운 수요 증가 가능성</p>
+                    </div>
+                </div>
+                 <div class="mt-10 border-t pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-bold text-lg text-green-600 mb-2">긍정적 여론 (기대감)</h4>
+                        <p class="text-gray-600">"SCFI 지수 반등", "운임 상승", "지정학적 리스크 = 해운업 호재" 등의 키워드가 부각되며 단기 실적 개선 기대감이 높습니다.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg text-red-600 mb-2">부정적 여론 (우려)</h4>
+                        <p class="text-gray-600">글로벌 교역량 감소, 경기 침체, 선사 간 경쟁 심화 등 중장기적인 운임 하락 요인에 대한 우려도 공존합니다.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="technicals" class="py-12 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-10">기술적 분석: 차트와 신호</h2>
+            <div class="text-center mb-12 max-w-3xl mx-auto">
+                <p class="text-gray-600">차트를 통해 현재 주가의 위치와 추세를 분석합니다. 주요 지지선과 저항선을 시각적으로 확인하고, 보조지표를 통해 단기적인 과열 또는 추세 지속 신호를 파악하여 매매 타이밍 수립에 참고합니다.</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-xl font-bold mb-4 text-center">주가 추세 및 주요 지지/저항선 (원)</h3>
+                <div class="chart-container">
+                    <canvas id="priceChart"></canvas>
+                </div>
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div>
+                        <p class="text-sm text-gray-500">강력 지지선</p>
+                        <p class="font-bold text-lg text-blue-700">20,000 ~ 22,000</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">단기 저항선</p>
+                        <p class="font-bold text-lg text-red-600">24,000 ~ 25,000</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">RSI (상대강도지수)</p>
+                        <p class="font-bold text-lg text-yellow-600">과매수 구간 진입</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="strategy" class="py-12 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-10">최종 트레이딩 전략</h2>
+            <div class="text-center mb-12 max-w-3xl mx-auto">
+                <p class="text-gray-600">모든 분석을 종합하여 HMM에 대한 최종 투자 전략을 제시합니다. 투자 성향에 따른 맞춤형 매매 시나리오와 함께, 잠재적 리스크를 관리하기 위한 구체적인 방안을 확인할 수 있습니다.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="stat-card bg-sky-50 border-sky-500">
+                    <h3 class="text-2xl font-bold mb-4 text-sky-800">적극적인 투자자</h3>
+                    <p class="text-gray-700 mb-4">단기 모멘텀을 활용하여 수익을 추구하는 투자자에게 적합한 전략입니다.</p>
+                    <div class="space-y-3 text-sm">
+                        <p><strong class="text-sky-700">매수 타이밍:</strong> 현재가(~24,000원)부터 분할 매수. 확전 등 뉴스 발생 시 추격 매수 고려.</p>
+                        <p><strong class="text-sky-700">매도 타이밍:</strong> 25,000원~26,000원 저항 시 일부 익절. 지정학적 리스크 완화 시 매도.</p>
+                        <p><strong class="text-sky-700">손절 라인:</strong> <span class="font-mono">21,500</span>원 이탈 시 손실 최소화.</p>
+                    </div>
+                </div>
+                <div class="stat-card bg-emerald-50 border-emerald-500">
+                    <h3 class="text-2xl font-bold mb-4 text-emerald-800">보수적인 투자자</h3>
+                    <p class="text-gray-700 mb-4">안정성을 중시하며, 조정 시 진입을 노리는 투자자에게 적합한 전략입니다.</p>
+                    <div class="space-y-3 text-sm">
+                        <p><strong class="text-emerald-700">매수 타이밍:</strong> 단기 조정 시 22,000원~22,500원 구간 지지 확인 후 진입.</p>
+                        <p><strong class="text-emerald-700">보유 전략:</strong> SCFI 지수 등 운임 지표 상승 추세 확인하며 보유, 수익 극대화.</p>
+                        <p><strong class="text-emerald-700">리스크 관리:</strong> 20일 이동평균선 이탈 시 비중 축소 고려.</p>
+                    </div>
+                </div>
+            </div>
+             <div class="mt-12 text-center p-6 bg-white rounded-lg shadow-md">
+                <h4 class="font-bold text-xl mb-3 text-gray-800">필수 리스크 관리</h4>
+                <p class="text-gray-600 max-w-2xl mx-auto">해운업의 높은 변동성을 고려하여 포트폴리오 비중을 조절하고, 이란-이스라엘 전쟁 상황, 국제 유가, SCFI 운임 지표를 실시간으로 모니터링하는 것이 매우 중요합니다.</p>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-gray-800 text-white text-center py-6 mt-12">
+        <p class="text-sm">본 자료는 정보 제공을 목적으로 하며, 투자 권유나 추천이 아닙니다.</p>
+        <p class="text-sm">모든 투자의 최종 책임은 투자자 본인에게 있습니다.</p>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const mobileNav = document.getElementById('mobile-nav');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href').includes(entry.target.id));
+                });
+                if(mobileNav.value !== `#${entry.target.id}`){
+                    mobileNav.value = `#${entry.target.id}`;
+                }
+            }
+        });
+    }, { rootMargin: "-30% 0px -70% 0px" });
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+    
+    mobileNav.addEventListener('change', (e) => {
+        const targetId = e.target.value;
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+             targetElement.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(revenueCtx, {
+        type: 'bar',
+        data: {
+            labels: ['2022년', '2023년(둔화)', '2024년(반등)'],
+            datasets: [{
+                label: '매출액',
+                data: [18.4, 8.4, 11.7],
+                backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 1
+            }, {
+                label: '영업이익',
+                data: [10, 0.58, 3.5],
+                backgroundColor: 'rgba(245, 158, 11, 0.7)',
+                borderColor: 'rgba(245, 158, 11, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw}조 원` } } },
+            scales: { y: { ticks: { callback: (v) => `${v}조` } } }
+        }
+    });
+
+    const debtRatioCtx = document.getElementById('debtRatioChart').getContext('2d');
+    new Chart(debtRatioCtx, {
+        type: 'line',
+        data: {
+            labels: ['2020말', '2021', '2022', '2023'],
+            datasets: [{
+                label: '부채비율',
+                data: [455, 73, 26, 25],
+                fill: true,
+                backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                borderColor: 'rgba(16, 185, 129, 1)',
+                tension: 0.1,
+                pointRadius: 5,
+                pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: {display: false}, tooltip: { callbacks: { label: (c) => `부채비율: ${c.raw}%` } } },
+            scales: { y: { ticks: { callback: (v) => `${v}%` } } }
+        }
+    });
+    
+    const priceCtx = document.getElementById('priceChart').getContext('2d');
+    new Chart(priceCtx, {
+        type: 'line',
+        data: {
+            labels: ['T-6', 'T-5', 'T-4', 'T-3', 'T-2', 'T-1', '현재'],
+            datasets: [{
+                label: '주가',
+                data: [18500, 19000, 20500, 21000, 22500, 23800, 23600],
+                borderColor: '#005b96',
+                backgroundColor: 'rgba(0, 91, 150, 0.1)',
+                tension: 0.2,
+                fill: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: (c) => `주가: ${c.raw.toLocaleString()} 원` } },
+                annotation: {
+                    annotations: {
+                        resistance: {
+                            type: 'box',
+                            yMin: 24000,
+                            yMax: 25000,
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderColor: 'rgba(239, 68, 68, 0.5)',
+                            borderWidth: 1,
+                            borderDash: [6, 6],
+                            label: { content: '단기 저항 구간', position: 'start', font: {size: 10}, color: 'red'}
+                        },
+                        support: {
+                            type: 'box',
+                            yMin: 20000,
+                            yMax: 22000,
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderColor: 'rgba(59, 130, 246, 0.5)',
+                            borderWidth: 1,
+                            borderDash: [6, 6],
+                             label: { content: '주요 지지 구간', position: 'end', font: {size: 10}, color: 'blue'}
+                        }
+                    }
+                }
+            },
+            scales: { y: { ticks: { callback: (v) => `${v.toLocaleString()}` } } }
+        }
+    });
+});
+</script>
+</body>
+</html>

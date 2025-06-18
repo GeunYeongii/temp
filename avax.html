@@ -1,627 +1,241 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>아발란체(AVAX) 인터랙티브 분석</title>
+    <title>아발란체(AVAX) 대화형 심층 분석 대시보드</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Warm Neutrals with Red Accent -->
-    <!-- Application Structure Plan: A single-page, scroll-based storytelling dashboard. The structure is designed to build a narrative for the user, starting with a high-level summary and key metrics, then diving into the core technology (the 'how'), followed by empirical evidence of its success (the 'proof'), the value proposition of the token (the 'why'), its position in the market (the 'context'), and finally, a balanced investment outlook (the 'verdict'). This thematic flow is more intuitive for understanding the investment case than the report's original academic structure. Key interactions include toggling chart data to see specific event impacts, clickable diagrams to simplify complex architecture, and an interactive SWOT analysis, all designed to make data exploration engaging and self-directed. -->
-    <!-- Visualization & Content Choices: 1. Hero Stats (Inform/Impress): Animated counters for TPS/Finality, instantly showing performance. Method: HTML/JS. 2. Architecture Diagram (Organize/Explain): Interactive HTML/CSS diagram with clickable nodes (X, C, P-Chains, Subnets) to reveal info cards. Justification: Simplifies complex technical concepts without a wall of text. 3. On-chain Activity (Change/Impact): Chart.js line chart with a button to toggle 'MapleStory Impact' data, visually demonstrating the subnet success story. 4. Tokenomics (Explain Process): Donut chart for supply and a visual flow diagram (HTML/CSS) for the fee burn mechanism. 5. Competitor Comparison (Compare): Interactive HTML table, allowing users to see stats side-by-side. 6. SWOT Analysis (Organize/Summarize): A four-quadrant clickable grid to present dense info cleanly. All choices adhere to the NO SVG/Mermaid rule, using Chart.js for charts and styled HTML/CSS for diagrams. -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Avalanche Red & Tech Blue with Neutral Grays -->
+    <!-- Application Structure Plan: The dashboard is designed as a strategic funnel. It starts with a high-level "Investment Thesis" for an immediate takeaway. It then delves into the 'Why' with "Core Growth Engines," explaining the fundamental value proposition (RWA, Gaming). Next, it addresses the current market reality in "Market Sentiment & Technicals," which combines public opinion with hard chart data. This section is crucial as it grounds expectations. The funnel concludes with the most actionable part, "Trading Strategies," providing clear, persona-based guidance. This structure helps users quickly grasp the opportunity, understand the context, and then act on the information. -->
+    <!-- Visualization & Content Choices:
+        - Investment Thesis: Goal: Inform. Viz: Stat Cards. Interaction: None. Justification: Provides a quick, scannable summary of the complex investment outlook. Method: HTML/Tailwind.
+        - Core Growth Engines (RWA, Gaming, Subnets): Goal: Organize/Inform. Viz: Icon-driven feature cards. Interaction: None. Justification: Simplifies complex technical concepts into easily digestible, visually distinct sections. Method: HTML/Tailwind.
+        - Technical Analysis Chart: Goal: Analyze/Relationships. Viz: Line Chart with annotated support/resistance zones. Interaction: Tooltip for price details. Justification: This is the most critical visualization. Instead of just listing prices, it visually maps the key trading zones directly onto the price action, making the technical analysis immediately understandable. Library: Chart.js with Annotation Plugin.
+        - Market Sentiment (Media/SNS): Goal: Compare. Viz: Two-column layout for pros and cons. Interaction: None. Justification: Allows for a balanced and quick comparison of bullish and bearish arguments. Method: HTML/Tailwind.
+        - Trading Strategy: Goal: Action. Viz: Distinct cards for "Conservative" and "Aggressive" investors. Interaction: None. Justification: Tailors advice to different risk profiles, making the final recommendations highly practical and user-centric. Method: HTML/Tailwind.
+    -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: #f8f9fa;
-            color: #212529;
-        }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 300px;
-            max-height: 400px;
-        }
-        @media (min-width: 768px) {
-            .chart-container {
-                height: 400px;
-            }
-        }
-        .section-title {
-            font-size: 2.25rem;
-            font-weight: 700;
-            line-height: 1.2;
-        }
-        .section-subtitle {
-            font-size: 1.125rem;
-            color: #6c757d;
-            margin-top: 0.5rem;
-        }
-        .card {
-            background-color: white;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            transition: all 0.3s ease-in-out;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
-        }
-        .nav-button {
-            transition: all 0.2s ease-in-out;
-        }
-        .nav-button.active {
-            background-color: #e53e3e;
-            color: white;
-        }
-        .nav-button:not(.active) {
-            background-color: #e9ecef;
-            color: #4a5568;
-        }
-        .swot-card {
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .swot-card.active {
-            transform: scale(1.05);
-            z-index: 10;
-        }
-        .content-hidden {
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-out, opacity 0.5s ease-out;
-            visibility: hidden;
-        }
-        .content-visible {
-            max-height: 1000px;
-            opacity: 1;
-            transition: max-height 0.7s ease-in, opacity 0.7s ease-in;
-            visibility: visible;
-        }
-        .tech-node {
-             border: 2px solid transparent;
-             transition: all 0.3s ease;
-        }
-        .tech-node.active {
-            border-color: #e53e3e;
-            background-color: #fff5f5;
-        }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8f9fa; color: #212529; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 400px; max-height: 50vh; }
+        @media (max-width: 768px) { .chart-container { height: 320px; } }
+        .nav-link { transition: color 0.3s, border-bottom-color 0.3s; }
+        .nav-link.active { color: #e84142; border-bottom-color: #e84142; font-weight: 700; }
+        .stat-card { background-color: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 4px 12px -1px rgb(0 0 0 / 0.05); transition: transform 0.3s, box-shadow 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px -3px rgb(0 0 0 / 0.1); }
+        .section-title { font-size: 2.25rem; font-weight: 700; text-align: center; margin-bottom: 3rem; color: #1a202c; }
     </style>
 </head>
 <body class="antialiased">
 
-    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-lg shadow-sm">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header class="bg-white/90 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4">
             <div class="flex items-center justify-between h-16">
-                <div class="flex items-center">
-                    <span class="text-2xl font-extrabold text-red-600">AVALANCHE</span>
-                    <span class="ml-2 text-2xl font-bold text-gray-700">Deep Dive</span>
+                <div class="text-xl font-bold text-gray-800">Quantum Trader: AVAX</div>
+                <div class="hidden md:flex items-center space-x-8 font-medium text-gray-600">
+                    <a href="#summary" class="nav-link border-b-2 border-transparent pb-1">투자 요약</a>
+                    <a href="#growth" class="nav-link border-b-2 border-transparent pb-1">성장 동력</a>
+                    <a href="#technicals" class="nav-link border-b-2 border-transparent pb-1">기술적 분석</a>
+                    <a href="#strategy" class="nav-link border-b-2 border-transparent pb-1">투자 전략</a>
                 </div>
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="#hero" class="nav-link text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">소개</a>
-                        <a href="#tech" class="nav-link text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">핵심 기술</a>
-                        <a href="#ecosystem" class="nav-link text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">생태계</a>
-                        <a href="#tokenomics" class="nav-link text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">토크노믹스</a>
-                        <a href="#outlook" class="nav-link text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">투자 전망</a>
-                    </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="bg-gray-200 rounded p-2 text-sm w-full">
+                        <option value="#summary">투자 요약</option>
+                        <option value="#growth">성장 동력</option>
+                        <option value="#technicals">기술적 분석</option>
+                        <option value="#strategy">투자 전략</option>
+                    </select>
                 </div>
             </div>
         </nav>
     </header>
 
-    <main>
-        <section id="hero" class="py-20 md:py-28 bg-white">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-gray-900">
-                    <span class="block">아발란체: 앱체인의 미래를 열다</span>
-                </h1>
-                <p class="mt-6 max-w-3xl mx-auto text-lg md:text-xl text-gray-600">
-                    단순한 '이더리움 킬러'를 넘어, 기업과 대규모 프로젝트를 위한 맞춤형 블록체인 인프라 '서브넷'을 통해 웹3의 새로운 패러다임을 제시합니다. 아발란체의 기술, 생태계, 투자 가치를 인터랙티브하게 탐색해보세요.
-                </p>
-                <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="p-6 bg-gray-50 rounded-lg">
-                        <div id="tps-counter" class="text-5xl font-bold text-red-600">0</div>
-                        <p class="mt-2 text-lg font-medium text-gray-700">초당 트랜잭션 (TPS)</p>
-                        <p class="text-sm text-gray-500">서브넷을 통해 이론상 무한 확장 가능</p>
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="hero" class="text-center py-12 md:py-16">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">아발란체(AVAX) 심층 분석</h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">기관의 선택을 받은 플랫폼, 아발란체의 현재와 미래 가치를 분석하고 변동성을 활용한 투자 전략을 제시합니다.</p>
+        </section>
+
+        <section id="summary" class="py-12 scroll-mt-20">
+            <h2 class="section-title">퀀텀 요약: 투자 의견 및 핵심 현황</h2>
+            <div class="text-center mb-12 max-w-3xl mx-auto">
+                 <p class="text-lg bg-gray-100 p-6 rounded-lg">기술적 <span class="font-bold text-yellow-500">'중립'</span> 속 펀더멘털 <span class="font-bold text-green-600">'긍정적'</span>, 변동성을 활용한 분할매수 전략 유효</p>
+                <p class="mt-4 text-gray-600">독보적인 '서브넷' 기술을 기반으로 기관 금융, RWA, 게임 시장을 개척하고 있으나, 암호화폐 시장 전반의 투자 심리 위축으로 단기 변동성이 높은 상황입니다.</p>
+            </div>
+        </section>
+
+        <section id="growth" class="py-12 scroll-mt-20 bg-gray-50 rounded-xl">
+            <h2 class="section-title">핵심 성장 동력: 플랫폼들의 플랫폼</h2>
+            <div class="text-center mb-12 max-w-3xl mx-auto"><p class="text-gray-600">'서브넷' 아키텍처는 아발란체의 핵심 경쟁력입니다. 기업과 프로젝트가 독립적인 맞춤형 블록체인을 구축하도록 지원하며, 특히 다음 세 분야에서 강력한 성장 모멘텀을 보여주고 있습니다.</p></div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="stat-card p-6">
+                     <div class="flex items-center justify-center mb-4"><span class="text-5xl">🏛️</span></div>
+                    <h3 class="text-xl font-bold text-center mb-3">기관 금융 & RWA</h3>
+                    <p class="text-gray-600 text-sm">블랙록, JP모건, 씨티그룹 등 거대 금융기관이 아발란체 서브넷을 활용해 토큰화 펀드, 외환 거래 솔루션을 테스트 중입니다. 이는 기술력과 확장성에 대한 시장의 강력한 신뢰를 의미합니다.</p>
+                </div>
+                <div class="stat-card p-6">
+                    <div class="flex items-center justify-center mb-4"><span class="text-5xl">🎮</span></div>
+                    <h3 class="text-xl font-bold text-center mb-3">블록체인 게이밍</h3>
+                    <p class="text-gray-600 text-sm">넥슨 '메이플스토리 유니버스' 등 대형 게임사들이 자체 서브넷을 통해 합류했습니다. 게임사에 높은 자유도와 안정성을 제공하며 더 많은 프로젝트를 유치할 기반을 마련했습니다.</p>
+                </div>
+                <div class="stat-card p-6">
+                     <div class="flex items-center justify-center mb-4"><span class="text-5xl">🌏</span></div>
+                    <h3 class="text-xl font-bold text-center mb-3">아시아 시장 확장</h3>
+                    <p class="text-gray-600 text-sm">한국, 일본 등 아시아 주요 시장에서 SK플래닛과 같은 대기업과의 파트너십을 통해 생태계를 공격적으로 확장하고 있어 새로운 수요 창출이 기대됩니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="technicals" class="py-12 scroll-mt-20">
+            <h2 class="section-title">기술적 분석: 바닥 다지기 또는 추가 하락?</h2>
+             <div class="text-center mb-12 max-w-3xl mx-auto">
+                 <p class="text-gray-600">장기 하락 추세를 벗어나려는 시도 후, 현재는 주요 지지선 부근에서 힘을 응축하는 기간 조정 단계에 있습니다. 차트상 중요 구간에 위치하여 향후 방향성 탐색이 임박한 것으로 보입니다.</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-xl">
+                <h3 class="text-xl font-bold mb-4 text-center">AVAX/USD 주가 추세 및 주요 구간</h3>
+                <div class="chart-container">
+                    <canvas id="priceChart"></canvas>
+                </div>
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div>
+                        <p class="text-sm text-gray-500">강력 지지 구간</p>
+                        <p class="font-bold text-lg text-blue-700">$19 ~ $22</p>
                     </div>
-                    <div class="p-6 bg-gray-50 rounded-lg">
-                        <div id="finality-counter" class="text-5xl font-bold text-red-600">0</div>
-                        <p class="mt-2 text-lg font-medium text-gray-700">트랜잭션 완결성 (초)</p>
-                        <p class="text-sm text-gray-500">결제 등 즉각적 확정이 필요한 금융에 최적</p>
+                    <div>
+                        <p class="text-sm text-gray-500">1차 저항 구간</p>
+                        <p class="font-bold text-lg text-red-600">$29 ~ $32</p>
                     </div>
-                    <div class="p-6 bg-gray-50 rounded-lg">
-                        <div class="text-5xl font-bold text-red-600">100%</div>
-                        <p class="mt-2 text-lg font-medium text-gray-700">수수료 소각률</p>
-                        <p class="text-sm text-gray-500">네트워크 성장이 토큰 가치에 직결되는 모델</p>
+                    <div>
+                        <p class="text-sm text-gray-500">RSI (상대강도지수)</p>
+                        <p class="font-bold text-lg text-gray-700">중립 구간 (반등 시도)</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="tech" class="py-20 md:py-24">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center">
-                    <h2 class="section-title">아발란체의 혁신적인 아키텍처</h2>
-                    <p class="section-subtitle">블록체인 트릴레마를 해결하는 아발란체의 독창적인 구조를 알아보세요. 각 구성요소를 클릭하여 상세 설명을 확인하세요.</p>
-                </div>
-                <div class="mt-16">
-                    <div class="relative max-w-4xl mx-auto">
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                            <div id="tech-node-primary" class="tech-node card p-6 text-center cursor-pointer col-span-1 lg:col-span-3">
-                                <h3 class="text-2xl font-bold">프라이머리 네트워크</h3>
-                                <p class="text-gray-500 mt-2">아발란체의 심장부</p>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
-                             <div id="tech-node-x" class="tech-node card p-6 text-center cursor-pointer">
-                                <h4 class="text-xl font-bold">X-Chain</h4>
-                                <p class="mt-1 text-sm text-gray-500">자산 생성 및 교환</p>
-                            </div>
-                            <div id="tech-node-p" class="tech-node card p-6 text-center cursor-pointer">
-                                <h4 class="text-xl font-bold">P-Chain</h4>
-                                <p class="mt-1 text-sm text-gray-500">네트워크 조정 및 서브넷 관리</p>
-                            </div>
-                            <div id="tech-node-c" class="tech-node card p-6 text-center cursor-pointer">
-                                <h4 class="text-xl font-bold">C-Chain</h4>
-                                <p class="mt-1 text-sm text-gray-500">스마트 컨트랙트 (EVM 호환)</p>
-                            </div>
-                        </div>
-                         <div class="mt-8 flex justify-center">
-                              <div id="tech-node-subnet" class="tech-node card p-6 text-center cursor-pointer w-full md:w-1/2">
-                                <h3 class="text-2xl font-bold">Subnet (서브넷)</h3>
-                                <p class="text-gray-500 mt-2">무한한 확장성의 엔진</p>
-                            </div>
-                        </div>
+        <section id="strategy" class="py-12 scroll-mt-20">
+            <h2 class="section-title">최종 투자 전략</h2>
+             <div class="text-center mb-12 max-w-3xl mx-auto">
+                <p class="text-gray-600">현재 가격대는 기술적으로 중요한 지지 구간으로, '매력적인 분할매수 시작 구간'입니다. 시장 전체의 투자심리를 고려하여, 리스크를 관리하며 접근하는 전략이 필요합니다.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="stat-card bg-sky-50 border-l-4 border-sky-500 p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-sky-800">보수적 투자자</h3>
+                    <p class="text-gray-700 mb-4 text-sm">안정성을 중시하며, 추세 전환을 확인하고 진입하는 전략입니다.</p>
+                    <div class="space-y-3 text-sm">
+                        <p><strong class="text-sky-700">매수 타이밍:</strong> 강력 지지선(<span class="font-mono">$19~$22</span>)에서 지지 확인 후 분할매수 시작, 또는 1차 저항선(<span class="font-mono">$32</span>) 돌파 후 안착 시 추격 매수.</p>
+                        <p><strong class="text-sky-700">매도 전략:</strong> 중장기 보유 관점. 2차 저항선(<span class="font-mono">$40~$43</span>)에서 일부 익절 후, 기관 채택 등 펀더멘털 뉴스에 따라 보유.</p>
                     </div>
-                    <div id="tech-details-container" class="mt-8 max-w-4xl mx-auto">
-                        <div id="tech-details-content" class="card p-8 content-hidden"></div>
+                </div>
+                <div class="stat-card bg-red-50 border-l-4 border-red-500 p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-red-800">공격적 투자자</h3>
+                    <p class="text-gray-700 mb-4 text-sm">변동성을 기회로 활용하여 저점 매수를 노리는 전략입니다.</p>
+                    <div class="space-y-3 text-sm">
+                        <p><strong class="text-red-700">매수 타이밍:</strong> 현재 가격부터 분할매수 시작. $19 부근까지 하락 가능성을 열어두고 추가 매수 자금 확보.</p>
+                        <p><strong class="text-red-700">매도 전략:</strong> 단기 반등 시 1차 저항선(<span class="font-mono">$29~$32</span>)에서 분할 익절. 나머지는 추세 전환 기대하며 보유.</p>
                     </div>
                 </div>
             </div>
-        </section>
-
-        <section id="ecosystem" class="py-20 md:py-24 bg-white">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center">
-                    <h2 class="section-title">숫자로 증명된 생태계의 성장</h2>
-                    <p class="section-subtitle">온체인 데이터는 아발란체 네트워크가 이론을 넘어 실질적인 채택 단계를 밟고 있음을 보여줍니다.</p>
-                </div>
-                <div class="mt-16">
-                     <div class="chart-container">
-                        <canvas id="txChart"></canvas>
-                    </div>
-                    <div class="mt-8 text-center">
-                        <button id="mapleStoryBtn" class="bg-red-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 transition duration-300">
-                           🍁 '메이플스토리 유니버스' 효과 보기
-                        </button>
-                         <p class="mt-4 text-sm text-gray-600">버튼을 클릭하여 주요 프로젝트가 네트워크에 미친 영향을 확인하세요.</p>
-                    </div>
-                </div>
-                <div class="mt-20">
-                    <h3 class="text-3xl font-bold text-center text-gray-800">글로벌 리더들의 선택: 주요 파트너십</h3>
-                    <div class="mt-10 grid grid-cols-2 md:grid-cols-4 gap-8 items-center">
-                         <div class="text-center p-4">
-                            <p class="text-2xl font-bold">J.P. Morgan</p>
-                            <p class="text-sm text-gray-500">자산 토큰화 테스트</p>
-                         </div>
-                         <div class="text-center p-4">
-                            <p class="text-2xl font-bold">Citi</p>
-                            <p class="text-sm text-gray-500">외환 거래 솔루션</p>
-                         </div>
-                         <div class="text-center p-4">
-                            <img src="https://placehold.co/150x50/e9ecef/4a5568?text=NEXON" alt="Nexon Logo" class="mx-auto h-12" onerror="this.onerror=null;this.src='https://placehold.co/150x50/e9ecef/4a5568?text=NEXON';">
-                            <p class="text-sm text-gray-500 mt-2">'메이플스토리 유니버스' 구축</p>
-                         </div>
-                         <div class="text-center p-4">
-                            <p class="text-2xl font-bold">AWS</p>
-                            <p class="text-sm text-gray-500">'AvaCloud' 공동 제공</p>
-                         </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <section id="tokenomics" class="py-20 md:py-24">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center">
-                    <h2 class="section-title">AVAX: 가치가 설계된 토큰</h2>
-                    <p class="section-subtitle">네트워크의 성공이 어떻게 AVAX 토큰의 가치 상승으로 이어지는지 알아보세요.</p>
-                </div>
-                <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                    <div class="card p-8">
-                        <h3 class="text-2xl font-bold mb-4">가치 상승의 선순환 구조</h3>
-                        <div class="space-y-4">
-                            <div class="flex items-center">
-                                <div class="bg-red-100 text-red-700 rounded-full h-10 w-10 flex items-center justify-center font-bold">1</div>
-                                <p class="ml-4 text-lg">네트워크 활동 증가 (게임, 금융 등)</p>
-                            </div>
-                            <div class="text-center text-3xl text-gray-400">↓</div>
-                            <div class="flex items-center">
-                                <div class="bg-red-100 text-red-700 rounded-full h-10 w-10 flex items-center justify-center font-bold">2</div>
-                                <p class="ml-4 text-lg">AVAX 거래 수수료 발생</p>
-                            </div>
-                             <div class="text-center text-3xl text-gray-400">↓</div>
-                            <div class="flex items-center">
-                                <div class="bg-red-100 text-red-700 rounded-full h-10 w-10 flex items-center justify-center font-bold">3</div>
-                                <p class="ml-4 text-lg"><span class="font-bold">100% 수수료 전량 소각</span></p>
-                            </div>
-                             <div class="text-center text-3xl text-gray-400">↓</div>
-                            <div class="flex items-center">
-                                <div class="bg-red-100 text-red-700 rounded-full h-10 w-10 flex items-center justify-center font-bold">4</div>
-                                <p class="ml-4 text-lg">총 유통량 감소 (디플레이션 압력)</p>
-                            </div>
-                             <div class="text-center text-3xl text-gray-400">↓</div>
-                             <div class="flex items-center">
-                                <div class="bg-red-100 text-red-700 rounded-full h-10 w-10 flex items-center justify-center font-bold">5</div>
-                                <p class="ml-4 text-lg">토큰 희소성 증가 및 가치 상승</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card p-8">
-                        <h3 class="text-2xl font-bold mb-4 text-center">AVAX 공급량 모델</h3>
-                        <div class="chart-container h-64 md:h-80">
-                            <canvas id="supplyChart"></canvas>
-                        </div>
-                        <p class="mt-6 text-center text-gray-600">
-                           총 공급량은 <span class="font-bold text-red-600">7억 2천만 개</span>로 고정되어 있으며, 소각 메커니즘을 통해 유통량은 점차 감소할 수 있습니다.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="outlook" class="py-20 md:py-24 bg-white">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center">
-                    <h2 class="section-title">투자 논거 및 리스크 분석</h2>
-                    <p class="section-subtitle">아발란체 투자의 강점, 약점, 기회, 위협 요인을 종합적으로 살펴봅니다. 각 항목을 클릭하여 자세한 내용을 확인하세요.</p>
-                </div>
-                <div class="mt-16 max-w-5xl mx-auto">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div id="swot-s" class="swot-card p-6 rounded-lg bg-green-100 border-2 border-transparent">
-                            <h3 class="text-2xl font-bold text-green-800">강점 (Strengths)</h3>
-                            <div id="swot-s-content" class="content-hidden mt-4 text-green-700 space-y-2"></div>
-                        </div>
-                        <div id="swot-w" class="swot-card p-6 rounded-lg bg-yellow-100 border-2 border-transparent">
-                            <h3 class="text-2xl font-bold text-yellow-800">약점 (Weaknesses)</h3>
-                             <div id="swot-w-content" class="content-hidden mt-4 text-yellow-700 space-y-2"></div>
-                        </div>
-                        <div id="swot-o" class="swot-card p-6 rounded-lg bg-blue-100 border-2 border-transparent">
-                            <h3 class="text-2xl font-bold text-blue-800">기회 (Opportunities)</h3>
-                            <div id="swot-o-content" class="content-hidden mt-4 text-blue-700 space-y-2"></div>
-                        </div>
-                        <div id="swot-t" class="swot-card p-6 rounded-lg bg-red-100 border-2 border-transparent">
-                            <h3 class="text-2xl font-bold text-red-800">위협 (Threats)</h3>
-                             <div id="swot-t-content" class="content-hidden mt-4 text-red-700 space-y-2"></div>
-                        </div>
-                    </div>
-                </div>
-                 <div class="mt-20 card max-w-4xl mx-auto p-8 bg-gray-50">
-                    <h3 class="text-3xl font-bold text-center text-gray-900">최종 결론</h3>
-                    <p class="mt-6 text-lg text-gray-700 text-center">
-                        아발란체(AVAX) 투자는 단일 블록체인을 넘어, <span class="font-bold text-red-600">'앱체인(App-Chain)'이라는 차세대 블록체인 패러다임의 성장</span>에 베팅하는 것과 같습니다. JP모건, 넥슨과 같은 최상위 파트너를 통한 기술 검증과 강력한 디플레이션 토크노믹스는 매력적인 투자 논거를 제공합니다.
-                    </p>
-                    <p class="mt-4 text-lg text-gray-700 text-center">
-                        하지만 치열한 경쟁, 기술적 복잡성, 규제 불확실성과 같은 리스크를 충분히 인지해야 하는 <span class="font-bold">고위험-고수익 투자처</span>로 평가됩니다. 장기적인 관점에서 주요 파트너십의 성공 여부를 주시하며 접근하는 전략이 바람직합니다.
-                    </p>
-                </div>
+             <div class="mt-12 text-center p-6 bg-white rounded-lg shadow-md">
+                <h4 class="font-bold text-xl mb-3 text-gray-800">필수 리스크 관리</h4>
+                <p class="text-gray-600 max-w-2xl mx-auto">강력 지지 구간의 최하단인 <span class="font-bold font-mono">$18</span>를 주봉 종가 기준으로 이탈할 경우, 기술적 위험 신호로 간주하고 비중 축소 또는 손절매를 통해 리스크를 반드시 관리해야 합니다.</p>
             </div>
         </section>
     </main>
-
-    <footer class="bg-gray-800">
-        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            <p class="text-center text-base text-gray-400">&copy; 2025 Avalanche Interactive Analysis. 이 자료는 정보 제공을 목적으로 하며, 투자 조언이 아닙니다.</p>
-        </div>
+    
+    <footer class="bg-gray-800 text-white text-center py-6 mt-12">
+        <p class="text-sm">본 자료는 정보 제공을 목적으로 하며, 투자 권유나 추천이 아닙니다.</p>
+        <p class="text-sm">모든 투자의 최종 책임은 투자자 본인에게 있습니다.</p>
     </footer>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+<script>
+document.addEventListener('DOMContentLoaded', () => {
 
-            const techData = {
-                primary: {
-                    title: '프라이머리 네트워크 (Primary Network)',
-                    description: '아발란체 네트워크의 보안과 운영을 책임지는 핵심 네트워크입니다. 모든 서브넷 검증인은 프라이머리 네트워크의 검증인이기도 해야 하므로, 생태계 전체의 보안을 보장합니다. 특화된 3개의 체인으로 구성되어 있습니다.'
-                },
-                x: {
-                    title: 'X-Chain (거래소 체인)',
-                    description: '디지털 자산의 생성과 거래를 전담합니다. AVAX 토큰을 비롯한 모든 아발란체 기반 자산의 발행과 전송이 이루어지며, DAG(방향성 비순환 그래프) 구조를 사용하여 매우 빠른 자산 교환 속도를 자랑합니다.'
-                },
-                p: {
-                    title: 'P-Chain (플랫폼 체인)',
-                    description: '네트워크의 메타데이터를 관리하고, 검증인(validator)을 조정하며, 아발란체의 핵심 기능인 서브넷(Subnet)을 생성하고 추적하는 역할을 합니다. 스테이킹과 관련된 모든 활동이 P-Chain에서 처리됩니다.'
-                },
-                c: {
-                    title: 'C-Chain (컨트랙트 체인)',
-                    description: '스마트 컨트랙트를 실행하기 위한 체인입니다. 이더리움 가상 머신(EVM)과 완벽하게 호환되어, 이더리움 개발자들이 기존의 코드와 툴을 그대로 사용하여 손쉽게 dApp을 구축하고 마이그레이션할 수 있습니다.'
-                },
-                subnet: {
-                    title: '서브넷 (Subnet)',
-                    description: '아발란체를 다른 블록체인과 근본적으로 구별 짓는 가장 중요한 기술입니다. 각 애플리케이션이 자신만의 독립적인 맞춤형 블록체인을 가질 수 있게 해줍니다. 이를 통해 특정 앱의 트래픽이 다른 앱에 영향을 주지 않아 무한한 확장성을 제공하며, 기업은 규제 준수나 수수료 정책 등을 자유롭게 설정할 수 있습니다. 이는 아발란치를 "웹3의 AWS"로 만드는 핵심 비전입니다.'
-                }
-            };
-            
-            const swotData = {
-                s: {
-                    title: '강점 (Strengths)',
-                    points: [
-                        '혁신적 기술: 빠른 속도와 즉각적인 완결성',
-                        '서브넷 아키텍처: 무한한 확장성과 맞춤화 기능',
-                        'EVM 호환성: 낮은 개발자 진입 장벽',
-                        '강력한 기관 파트너십: JP모건, 씨티, AWS 등',
-                        '견고한 토크노믹스: 100% 수수료 소각 모델'
-                    ]
-                },
-                w: {
-                    title: '약점 (Weaknesses)',
-                    points: [
-                        '기술적 복잡성: 신규 사용자의 높은 학습 곡선',
-                        '검증인 중앙화 우려: 높은 스테이킹 최소 수량 (2,000 AVAX)',
-                        '치열한 경쟁: 이더리움, 솔라나 등과의 경쟁 심화'
-                    ]
-                },
-                o: {
-                    title: '기회 (Opportunities)',
-                    points: [
-                        '실물자산(RWA) 토큰화 시장 선점 가능성',
-                        'AAA급 블록체인 게임 시장 공략',
-                        '엔터프라이즈 블록체인 도입 가속화'
-                    ]
-                },
-                t: {
-                    title: '위협 (Threats)',
-                    points: [
-                        '글로벌 규제 불확실성 (미등록 증권 리스크)',
-                        '암호화폐 시장 전체의 높은 변동성',
-                        '로드맵 실행 리스크'
-                    ]
-                }
-            };
-            
-            function animateCounter(element, target, duration, isFloat = false) {
-                let start = 0;
-                let startTime = null;
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const mobileNav = document.getElementById('mobile-nav');
 
-                function animation(currentTime) {
-                    if (startTime === null) startTime = currentTime;
-                    const progress = Math.min((currentTime - startTime) / duration, 1);
-                    let currentValue = start + progress * (target - start);
-                    if (isFloat) {
-                        element.innerText = currentValue.toFixed(1);
-                    } else {
-                        element.innerText = Math.floor(currentValue).toLocaleString();
-                    }
-                    if (progress < 1) {
-                        requestAnimationFrame(animation);
-                    }
-                }
-                requestAnimationFrame(animation);
-            }
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        if (entry.target.id === 'hero') {
-                            animateCounter(document.getElementById('tps-counter'), 4500, 1500);
-                            animateCounter(document.getElementById('finality-counter'), 1, 1500, true);
-                        }
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.5 });
-            
-            observer.observe(document.getElementById('hero'));
-            
-            const txChartCtx = document.getElementById('txChart').getContext('2d');
-            const supplyChartCtx = document.getElementById('supplyChart').getContext('2d');
-
-            const baseTxData = {
-                labels: ['1월', '2월', '3월', '4월', '5월', '6월'],
-                datasets: [{
-                    label: '일일 평균 트랜잭션 (만 건)',
-                    data: [22, 25, 20, 28, 35, 40],
-                    borderColor: 'rgba(229, 62, 62, 0.8)',
-                    backgroundColor: 'rgba(229, 62, 62, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                }]
-            };
-
-            const mapleStoryTxData = {
-                 labels: ['1월', '2월', '3월', '4월', '5월', '6월'],
-                datasets: [{
-                    label: '일일 평균 트랜잭션 (만 건)',
-                    data: [22, 25, 20, 30, 85, 100],
-                    borderColor: 'rgba(56, 161, 105, 0.8)',
-                    backgroundColor: 'rgba(56, 161, 105, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                }]
-            };
-
-            const chartOptions = {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                         ticks: {
-                            callback: function(value) {
-                                return value + '만';
-                            }
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                    },
-                    tooltip: {
-                         callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed.y !== null) {
-                                    label += context.parsed.y + '만 건';
-                                }
-                                return label;
-                            }
-                        }
-                    }
-                }
-            };
-
-            let txChart = new Chart(txChartCtx, {
-                type: 'line',
-                data: baseTxData,
-                options: chartOptions
-            });
-
-            let isMapleMode = false;
-            document.getElementById('mapleStoryBtn').addEventListener('click', () => {
-                isMapleMode = !isMapleMode;
-                if (isMapleMode) {
-                    txChart.data.datasets = mapleStoryTxData.datasets;
-                    txChart.options.plugins.title = { display: true, text: "'메이플스토리 유니버스' 출시 후 트랜잭션 급증" };
-                    document.getElementById('mapleStoryBtn').textContent = '원래대로 돌아가기';
-                    document.getElementById('mapleStoryBtn').classList.remove('bg-red-600', 'hover:bg-red-700');
-                    document.getElementById('mapleStoryBtn').classList.add('bg-gray-600', 'hover:bg-gray-700');
-                } else {
-                    txChart.data.datasets = baseTxData.datasets;
-                    txChart.options.plugins.title = { display: false };
-                    document.getElementById('mapleStoryBtn').textContent = "🍁 '메이플스토리 유니버스' 효과 보기";
-                    document.getElementById('mapleStoryBtn').classList.remove('bg-gray-600', 'hover:bg-gray-700');
-                    document.getElementById('mapleStoryBtn').classList.add('bg-red-600', 'hover:bg-red-700');
-                }
-                txChart.update();
-            });
-
-            const supplyChart = new Chart(supplyChartCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['제네시스 발행량', '스테이킹 보상 (미래 발행)', '소각된 양 (누적)'],
-                    datasets: [{
-                        data: [360000000, 355000000, 5000000],
-                        backgroundColor: [
-                            'rgba(239, 68, 68, 0.7)',
-                            'rgba(59, 130, 246, 0.7)',
-                            'rgba(75, 85, 99, 0.7)'
-                        ],
-                        borderColor: [
-                            '#ffffff',
-                            '#ffffff',
-                            '#ffffff'
-                        ],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.parsed || 0;
-                                    return `${label}: ${value.toLocaleString()} AVAX`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-            
-            const techNodes = document.querySelectorAll('.tech-node');
-            const techDetailsContainer = document.getElementById('tech-details-container');
-            const techDetailsContent = document.getElementById('tech-details-content');
-            let activeTechNode = null;
-            
-            techNodes.forEach(node => {
-                node.addEventListener('click', () => {
-                    const techId = node.id.split('-')[2];
-                    
-                    if(activeTechNode === node) {
-                        techDetailsContainer.firstElementChild.classList.remove('content-visible');
-                        techDetailsContainer.firstElementChild.classList.add('content-hidden');
-                        node.classList.remove('active');
-                        activeTechNode = null;
-                        return;
-                    }
-
-                    if(activeTechNode) {
-                        activeTechNode.classList.remove('active');
-                    }
-                    
-                    node.classList.add('active');
-                    activeTechNode = node;
-
-                    const data = techData[techId];
-                    techDetailsContent.innerHTML = `<h3 class="text-2xl font-bold mb-4">${data.title}</h3><p class="text-gray-600">${data.description}</p>`;
-                    
-                    techDetailsContainer.firstElementChild.classList.remove('content-hidden');
-                    techDetailsContainer.firstElementChild.classList.add('content-visible');
-                });
-            });
-
-            const swotCards = document.querySelectorAll('.swot-card');
-            let activeSwotCard = null;
-
-            swotCards.forEach(card => {
-                const swotId = card.id.split('-')[1];
-                const contentDiv = document.getElementById(`swot-${swotId}-content`);
-                const data = swotData[swotId];
-                contentDiv.innerHTML = data.points.map(point => `<p class="flex items-start"><span class="mr-2 mt-1">✓</span><span>${point}</span></p>`).join('');
-
-                card.addEventListener('click', () => {
-                    if (activeSwotCard && activeSwotCard !== card) {
-                        activeSwotCard.classList.remove('active');
-                        activeSwotCard.querySelector('.content-hidden, .content-visible').classList.add('content-hidden');
-                        activeSwotCard.querySelector('.content-hidden, .content-visible').classList.remove('content-visible');
-                    }
-                    
-                    card.classList.toggle('active');
-                    contentDiv.classList.toggle('content-hidden');
-                    contentDiv.classList.toggle('content-visible');
-                    
-                    activeSwotCard = card.classList.contains('active') ? card : null;
-                });
-            });
-
-            const navLinks = document.querySelectorAll('.nav-link');
-            const sections = document.querySelectorAll('main section');
-            
-            window.addEventListener('scroll', () => {
-                let current = '';
-                sections.forEach(section => {
-                    const sectionTop = section.offsetTop;
-                    if (pageYOffset >= sectionTop - 80) {
-                        current = section.getAttribute('id');
-                    }
-                });
-
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.getAttribute('id');
                 navLinks.forEach(link => {
-                    link.classList.remove('text-red-600', 'font-bold');
-                    if (link.getAttribute('href').substring(1) === current) {
-                         link.classList.add('text-red-600', 'font-bold');
-                    }
+                    link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
                 });
-            });
+                if (mobileNav.value !== `#${id}`) {
+                    mobileNav.value = `#${id}`;
+                }
+            }
         });
-    </script>
+    }, { rootMargin: "-40% 0px -60% 0px" });
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+    
+    mobileNav.addEventListener('change', (e) => {
+        const targetId = e.target.value;
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+             targetElement.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+    const priceCtx = document.getElementById('priceChart').getContext('2d');
+    new Chart(priceCtx, {
+        type: 'line',
+        data: {
+            labels: ['4월초', '4월말', '5월중순', '5월말', '6월초', '현재'],
+            datasets: [{
+                label: 'AVAX/USD',
+                data: [42, 30, 38, 28, 24, 21],
+                borderColor: '#e84142',
+                backgroundColor: 'rgba(232, 65, 66, 0.1)',
+                tension: 0.1,
+                fill: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: (c) => `가격: $${c.raw.toLocaleString()}` } },
+                annotation: {
+                    annotations: {
+                        resistance: {
+                            type: 'box',
+                            yMin: 29,
+                            yMax: 32,
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderColor: 'rgba(239, 68, 68, 0.4)',
+                            borderWidth: 1,
+                            borderDash: [6, 6],
+                            label: { content: '1차 저항 구간', position: 'start', font: {size: 10}, color: 'rgba(239, 68, 68, 0.8)'}
+                        },
+                        support: {
+                            type: 'box',
+                            yMin: 19,
+                            yMax: 22,
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderColor: 'rgba(59, 130, 246, 0.4)',
+                            borderWidth: 1,
+                            borderDash: [6, 6],
+                             label: { content: '강력 지지 구간', position: 'end', font: {size: 10}, color: 'rgba(59, 130, 246, 0.8)'}
+                        }
+                    }
+                }
+            },
+            scales: { y: { ticks: { callback: (v) => `$${v}` } } }
+        }
+    });
+});
+</script>
 </body>
 </html>

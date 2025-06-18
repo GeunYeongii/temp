@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카카오(035720) 대화형 심층 분석 대시보드 (2025.06)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Kakao Yellow & Neutral Gray with Accent Colors -->
+    <!-- Application Structure Plan: The dashboard is structured as a narrative journey through Kakao's current predicament and future potential. 1. A top-level "Investment Thesis" immediately frames the stock as a high-risk, high-return play. 2. The core "Central Conflict" section visually pits the dominant 'Judicial Risk' against the nascent 'AI Hope'. 3. "Financial Health" analyzes the numbers, highlighting the gradual recovery but still-high valuation. 4. "Technical Analysis" shows the long bottoming process on the chart. 5. Finally, "Actionable Trading Strategies" provides clear, risk-adjusted guidance for different investors. This structure helps users understand the risks before considering the potential rewards. -->
+    <!-- Visualization & Content Choices:
+        - Investment Thesis: Goal: Inform. Viz: Stat cards for Valuation, Risk, and Potential. Justification: Quickly communicates the high-risk, high-return nature of the stock. Method: HTML/Tailwind.
+        - Central Conflict (Risk vs. Hope): Goal: Compare. Viz: A stark two-column layout. Justification: This is the core story of Kakao today; visualizing this conflict is essential for user understanding. Method: HTML/Tailwind.
+        - Financial Charts: Goal: Compare/Change. Viz: Bar chart for Operating Profit to highlight the recent turnaround. Valuation metrics (PER/PBR) are presented in text cards due to their extreme values, which are better explained than charted. Library: Chart.js.
+        - Technical Analysis Chart: Goal: Analyze. Viz: Line chart with annotated support/resistance boxes. Justification: Provides a clear visual map of the long-term bottoming pattern and key price levels for traders. Library: Chart.js with Annotation Plugin.
+        - Trading Strategy: Goal: Action. Viz: Persona-based cards for "Ultra-Conservative" and "Split-Purchase" approaches. Justification: The high-risk nature demands very clear, risk-differentiated advice. Method: HTML/Tailwind.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f7f8fa; color: #333; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 400px; max-height: 50vh; }
+        @media (max-width: 768px) { .chart-container { height: 320px; } }
+        .nav-link { transition: color 0.3s, border-bottom-color 0.3s; }
+        .nav-link.active { color: #f9e000; border-bottom-color: #f9e000; font-weight: 700; }
+        .stat-card { background-color: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 4px 15px -1px rgb(0 0 0 / 0.06); transition: transform 0.3s, box-shadow 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -3px rgb(0 0 0 / 0.1); }
+        .section-title { font-size: 2.25rem; font-weight: 700; text-align: center; margin-bottom: 3rem; color: #1a202c; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/90 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="text-xl font-bold text-gray-800">Quantum Trader: 카카오 (035720)</div>
+                <div class="hidden md:flex items-center space-x-8 font-medium text-gray-600">
+                    <a href="#summary" class="nav-link border-b-2 border-transparent pb-1">투자 요약</a>
+                    <a href="#conflict" class="nav-link border-b-2 border-transparent pb-1">핵심 이슈</a>
+                    <a href="#financials" class="nav-link border-b-2 border-transparent pb-1">재무 분석</a>
+                    <a href="#technicals" class="nav-link border-b-2 border-transparent pb-1">기술적 분석</a>
+                    <a href="#strategy" class="nav-link border-b-2 border-transparent pb-1">투자 전략</a>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="bg-gray-200 rounded p-2 text-sm w-full">
+                        <option value="#summary">투자 요약</option>
+                        <option value="#conflict">핵심 이슈</option>
+                        <option value="#financials">재무 분석</option>
+                        <option value="#technicals">기술적 분석</option>
+                        <option value="#strategy">투자 전략</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="hero" class="text-center py-12 md:py-16">
+            <p class="text-gray-500 text-sm">2025년 6월 18일 기준</p>
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 my-2">카카오 심층 분석 및 트레이딩 전략</h1>
+            <p class="text-2xl text-gray-800">현재가: <span class="font-bold text-yellow-500">53,900원</span></p>
+        </section>
+
+        <section id="summary" class="py-12 scroll-mt-20">
+            <h2 class="section-title">투자 요약: 기회와 위험의 공존</h2>
+            <div class="text-center mb-12 max-w-3xl mx-auto">
+                 <p class="text-lg bg-white p-6 rounded-lg shadow-md">'사법 리스크'라는 명백한 족쇄와 'AI 턴어라운드'라는 희망이 공존하는 <span class="font-bold text-red-500">'하이 리스크-하이 리턴'</span>의 전형적인 구간입니다.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="stat-card text-center">
+                    <h3 class="text-lg font-semibold text-gray-500 mb-2">밸류에이션</h3>
+                    <p class="text-3xl font-bold text-red-600">고평가 상태</p>
+                    <p class="text-sm text-gray-500 mt-2">예상 PER 40배, AI 기대감 선반영</p>
+                </div>
+                <div class="stat-card text-center">
+                    <h3 class="text-lg font-semibold text-gray-500 mb-2">펀더멘털</h3>
+                    <p class="text-3xl font-bold text-yellow-600">점진적 개선</p>
+                    <p class="text-sm text-gray-500 mt-2">이익 턴어라운드 시작, 재무 안정성은 우수</p>
+                </div>
+                <div class="stat-card text-center">
+                    <h3 class="text-lg font-semibold text-gray-500 mb-2">핵심 변수</h3>
+                    <p class="text-3xl font-bold text-blue-600">사법 리스크</p>
+                    <p class="text-sm text-gray-500 mt-2">경영진 재판 결과가 주가 방향성 결정</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="conflict" class="py-12 scroll-mt-20 bg-gray-50 rounded-xl">
+            <h2 class="section-title">핵심 이슈: 사법 리스크 vs AI 기대감</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-red-50 p-6 rounded-lg border-l-4 border-red-500">
+                    <h3 class="text-xl font-bold text-red-800 mb-4">주가를 짓누르는 족쇄 (The Risk)</h3>
+                    <ul class="space-y-2 text-sm text-gray-700">
+                        <li>✔️ **사법 리스크:** SM 시세조종 의혹 재판이 최대 불확실성</li>
+                        <li>✔️ **정부 규제:** 플랫폼 독과점에 대한 규제 강화 기조</li>
+                        <li>✔️ **성장성 둔화:** 주력 사업의 성장세 둔화, 높은 밸류에이션 부담</li>
+                        <li>✔️ **냉소적 투자심리:** 장기간의 주가 하락으로 인한 불신 팽배</li>
+                    </ul>
+                </div>
+                 <div class="bg-green-50 p-6 rounded-lg border-l-4 border-green-500">
+                    <h3 class="text-xl font-bold text-green-800 mb-4">반등의 열쇠 (The Hope)</h3>
+                    <ul class="space-y-2 text-sm text-gray-700">
+                        <li>✔️ **AI 중심 재도약:** 자체 LLM 기반 서비스 혁신 기대감</li>
+                        <li>✔️ **경영 쇄신:** 신임 대표 체제의 내실 다지기 및 비용 효율화</li>
+                        <li>✔️ **독점적 플랫폼:** 4,800만 MAU의 카카오톡 트래픽은 여전히 강력</li>
+                        <li>✔️ **기술적 대바닥:** 1년 이상 바닥 다지기로 추가 하락 제한적</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="financials" class="py-12 scroll-mt-20">
+            <h2 class="section-title">재무 분석: 바닥 다지고 이익 개선 시작</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-bold mb-4 text-center">분기별 영업이익 추이 (억원)</h3>
+                    <div class="chart-container">
+                        <canvas id="profitChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-bold mb-4 text-center">밸류에이션 지표</h3>
+                    <div class="space-y-4">
+                        <div class="stat-card">
+                            <h4 class="font-bold text-gray-600">PER (주가수익비율)</h4>
+                            <p class="text-2xl font-bold text-red-500">약 40배 (25년 예상)</p>
+                            <p class="text-xs text-gray-500">네이버 등 경쟁사 대비 높은 수준, 성장 기대감 반영</p>
+                        </div>
+                         <div class="stat-card">
+                            <h4 class="font-bold text-gray-600">PBR (주가순자산비율)</h4>
+                            <p class="text-2xl font-bold text-yellow-600">약 2.18배</p>
+                            <p class="text-xs text-gray-500">과거 대비 낮아졌으나 여전히 프리미엄 존재</p>
+                        </div>
+                         <div class="stat-card">
+                            <h4 class="font-bold text-gray-600">ROE (자기자본이익률)</h4>
+                            <p class="text-2xl font-bold text-blue-500">한 자릿수</p>
+                            <p class="text-xs text-gray-500">자본 효율성 개선이 시급한 과제</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="technicals" class="py-12 scroll-mt-20">
+            <h2 class="section-title">기술적 분석: 대바닥 형성 과정</h2>
+            <div class="bg-white p-6 rounded-lg shadow-xl">
+                <h3 class="text-xl font-bold mb-4 text-center">카카오 주가 추세 및 주요 구간 (원)</h3>
+                <div class="chart-container">
+                    <canvas id="priceChart"></canvas>
+                </div>
+                <p class="text-center mt-4 text-sm text-gray-600">1년 이상의 긴 바닥 다지기 과정. 추세 전환을 위해서는 핵심 저항선 돌파가 필수적.</p>
+            </div>
+        </section>
+
+        <section id="strategy" class="py-12 scroll-mt-20">
+            <h2 class="section-title">최종 트레이딩 전략</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="stat-card bg-sky-50 border-l-4 border-sky-500 p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-sky-800">초보수적 관점 (안정성 최우선)</h3>
+                    <p class="text-gray-700 mb-4 text-sm">가장 큰 불확실성인 '사법 리스크' 해소를 확인하고 진입하는 전략입니다.</p>
+                    <div class="space-y-3 text-sm">
+                        <p><strong class="text-sky-700">매수 타이밍:</strong> 재판 결과 등 리스크 해소 확인 후 진입. 주가는 더 비싸더라도 확실성을 확보.</p>
+                        <p><strong class="text-sky-700">현재 전략:</strong> 관망. 섣부른 매수 자제.</p>
+                    </div>
+                </div>
+                <div class="stat-card bg-red-50 border-l-4 border-red-500 p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-red-800">분할매수 관점 (위험 감수)</h3>
+                    <p class="text-gray-700 mb-4 text-sm">장기적 관점에서 현재 가격을 '무릎'으로 판단하고 접근하는 전략입니다.</p>
+                    <div class="space-y-3 text-sm">
+                        <p><strong class="text-red-700">매수 타이밍:</strong> 현재가부터 <span class="font-mono">45,000 ~ 50,000원</span> 밴드에서 적립식 분할 매수. 소액으로 제한.</p>
+                        <p><strong class="text-red-700">매도 전략:</strong> 1차 저항선 <span class="font-mono">62,000원</span>에서 일부 익절. 나머지는 AI 성과 확인하며 장기 보유.</p>
+                    </div>
+                </div>
+            </div>
+             <div class="mt-12 text-center p-6 bg-white rounded-lg shadow-md">
+                <h4 class="font-bold text-xl mb-3 text-gray-800">필수 리스크 관리: 손절 라인</h4>
+                <p class="text-gray-600 max-w-2xl mx-auto">장기 지지선인 <span class="font-bold font-mono">42,000</span>원이 붕괴될 경우, 예상치 못한 추가 악재 발생의 신호일 수 있으므로 비중 축소 또는 손절매 결단이 필요합니다.</p>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-gray-800 text-white text-center py-6 mt-12">
+        <p class="text-sm">본 자료는 정보 제공을 목적으로 하며, 투자 권유나 추천이 아닙니다.</p>
+        <p class="text-sm">모든 투자의 최종 책임은 투자자 본인에게 있습니다.</p>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const mobileNav = document.getElementById('mobile-nav');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.getAttribute('id');
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+                });
+                if (mobileNav.value !== `#${id}`) {
+                    mobileNav.value = `#${id}`;
+                }
+            }
+        });
+    }, { rootMargin: "-40% 0px -60% 0px" });
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+    
+    mobileNav.addEventListener('change', (e) => {
+        const targetId = e.target.value;
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+             targetElement.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+    const profitCtx = document.getElementById('profitChart').getContext('2d');
+    new Chart(profitCtx, {
+        type: 'bar',
+        data: {
+            labels: ['23.3Q', '23.4Q', '24.1Q', '24.2Q(E)'],
+            datasets: [{
+                label: '영업이익',
+                data: [1403, 1892, 1201, 1500],
+                backgroundColor: 'rgba(254, 226, 85, 0.7)',
+                borderColor: 'rgba(254, 226, 85, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `영업이익: ${c.raw.toLocaleString()}억원` } } },
+            scales: { y: { ticks: { callback: (v) => `${v.toLocaleString()}` } } }
+        }
+    });
+    
+    const priceCtx = document.getElementById('priceChart').getContext('2d');
+    new Chart(priceCtx, {
+        type: 'line',
+        data: {
+            labels: ['1월', '2월', '3월', '4월', '5월', '현재'],
+            datasets: [{
+                label: '카카오 주가',
+                data: [58000, 52000, 55000, 48000, 46000, 53900],
+                borderColor: '#4a5568',
+                backgroundColor: 'rgba(74, 85, 104, 0.1)',
+                tension: 0.1,
+                fill: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: (c) => `주가: ${c.raw.toLocaleString()}원` } },
+                annotation: {
+                    annotations: {
+                        resistance1: {
+                            type: 'box',
+                            yMin: 55000,
+                            yMax: 56000,
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderColor: 'rgba(239, 68, 68, 0.4)',
+                            borderWidth: 1,
+                            borderDash: [6, 6],
+                            label: { content: '1차 저항', position: 'start', font: {size: 10}, color: 'rgba(239, 68, 68, 0.8)'}
+                        },
+                         resistance2: {
+                            type: 'box',
+                            yMin: 62000,
+                            yMax: 63000,
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderColor: 'rgba(239, 68, 68, 0.4)',
+                            borderWidth: 1,
+                            borderDash: [6, 6],
+                            label: { content: '주요 저항', position: 'start', font: {size: 10}, color: 'rgba(239, 68, 68, 0.8)'}
+                        },
+                        support: {
+                            type: 'box',
+                            yMin: 42000,
+                            yMax: 45000,
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderColor: 'rgba(59, 130, 246, 0.4)',
+                            borderWidth: 1,
+                            borderDash: [6, 6],
+                             label: { content: '강력 지지 구간', position: 'end', font: {size: 10}, color: 'rgba(59, 130, 246, 0.8)'}
+                        }
+                    }
+                }
+            },
+            scales: { y: { ticks: { callback: (v) => `${v.toLocaleString()}` } } }
+        }
+    });
+});
+</script>
+</body>
+</html>

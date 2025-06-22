@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IREN LTD. (NASDAQ: IREN) 기업 심층 분석 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        .section-title i {
+            margin-right: 0.75rem;
+            color: #3b82f6;
+        }
+        .kpi-card {
+            padding: 1.5rem;
+            border-left: 4px solid;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #111827;
+        }
+        .kpi-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        .growth-positive { color: #10b981; }
+        .disclaimer {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-align: center;
+            padding: 2rem 1rem;
+            background-color: #f9fafb;
+            border-radius: 8px;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="mb-8 p-6 card bg-gray-800 text-white rounded-xl">
+            <div class="flex flex-col md:flex-row justify-between items-start">
+                <div>
+                    <h1 class="text-3xl font-extrabold">IREN LTD. (NASDAQ: IREN)</h1>
+                    <p class="text-lg text-gray-300 mt-1">기업 심층 분석 보고서</p>
+                </div>
+                <div class="text-left md:text-right mt-4 md:mt-0">
+                    <p class="text-sm text-gray-400">작성일: 2025년 6월 22일</p>
+                    <p class="text-sm text-gray-400">분석가: 👩‍💼 Gemini 기업 분석가</p>
+                </div>
+            </div>
+            <div class="mt-6 p-4 bg-gray-700 rounded-lg flex flex-col sm:flex-row items-center gap-4">
+                <span class="text-xl font-bold bg-green-500 text-white px-4 py-1 rounded-full">투자의견: 긍정적 (Positive)</span>
+                <p class="text-gray-200 text-center sm:text-left">디지털 자산과 AI, 두 메가트렌드의 교차점에서 인프라를 선점하는 독보적 성장주</p>
+            </div>
+        </header>
+
+        <!-- KPI Section -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="card kpi-card border-blue-500">
+                <p class="kpi-label">Q3 FY25 매출</p>
+                <div>
+                    <p class="kpi-value">$1.48억</p>
+                    <p class="font-bold growth-positive">▲ 24% (QoQ)</p>
+                </div>
+            </div>
+            <div class="card kpi-card border-green-500">
+                <p class="kpi-label">Q3 FY25 조정 EBITDA</p>
+                <div>
+                    <p class="kpi-value">$83.3M</p>
+                    <p class="font-bold growth-positive">▲ 33% (QoQ)</p>
+                </div>
+            </div>
+            <div class="card kpi-card border-purple-500">
+                <p class="kpi-label">AI 클라우드 연간 매출</p>
+                <div>
+                    <p class="kpi-value">$28M+</p>
+                    <p class="font-semibold text-purple-600">고속 성장 중</p>
+                </div>
+            </div>
+            <div class="card kpi-card border-yellow-500">
+                <p class="kpi-label">총 확보 전력 용량</p>
+                <div>
+                    <p class="kpi-value">2GW+</p>
+                    <p class="font-semibold text-yellow-600">강력한 진입 장벽</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left Column -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Why Buy? -->
+                <div class="card p-6">
+                    <h2 class="section-title"><i class="fas fa-rocket"></i>이 주식을 왜 매수해야 하는가?</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <h3 class="font-bold text-gray-800">'AI 인프라 기업'으로의 진화</h3>
+                                <p class="text-sm text-gray-600">단순 채굴주가 아닌 AI 시대의 핵심 인프라를 보유. 가치 재평가 기대.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <h3 class="font-bold text-gray-800">대체 불가능한 핵심 자산</h3>
+                                <p class="text-sm text-gray-600">기가와트(GW)급 전력과 데이터 센터 부지는 현재 돈으로도 구하기 힘든 희소 자원.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <h3 class="font-bold text-gray-800">수익성과 성장성의 겸비</h3>
+                                <p class="text-sm text-gray-600">채굴로 현금을 창출하고, 97% 마진의 AI 사업에 재투자하는 선순환 구조.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <h3 class="font-bold text-gray-800">정치적 순풍 (Tailwind)</h3>
+                                <p class="text-sm text-gray-600">미국의 친(親)암호화폐/에너지 정책 기조의 직접적인 수혜 기대.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Core Advantage -->
+                <div class="card p-6">
+                    <h2 class="section-title"><i class="fas fa-shield-alt"></i>핵심 경쟁 우위: 인프라 선점</h2>
+                    <div class="space-y-4">
+                        <div class="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                            <h3 class="font-bold text-blue-800 flex items-center"><i class="fas fa-map-marker-alt mr-2"></i>Childress, TX (750MW)</h3>
+                            <p class="text-sm text-blue-700">현재 비트코인 채굴 및 AI 데이터 센터(Horizon 1, 50MW)가 건설 중인 핵심 운영 기지.</p>
+                        </div>
+                        <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-200">
+                            <h3 class="font-bold text-indigo-800 flex items-center"><i class="fas fa-forward mr-2"></i>Sweetwater, TX (2GW)</h3>
+                            <p class="text-sm text-indigo-700">최대 $700억 규모의 AI 투자를 유치할 수 있는 잠재력을 가진 차세대 플래그십 AI 허브.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Political Impact -->
+                <div class="card p-6">
+                    <h2 class="section-title"><i class="fas fa-landmark"></i>트럼프 정책 및 지정학적 영향</h2>
+                    <ul class="list-none space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-vote-yea text-blue-500 mt-1 mr-3"></i>
+                            <div>
+                                <h3 class="font-semibold text-gray-800">친(親)암호화폐 스탠스</h3>
+                                <p class="text-sm text-gray-600">트럼프의 비트코인 채굴 지지 발언은 규제 리스크를 완화하고 투자 심리를 개선하는 강력한 촉매제.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-flag-usa text-red-500 mt-1 mr-3"></i>
+                            <div>
+                                <h3 class="font-semibold text-gray-800">에너지 주권과 지정학</h3>
+                                <p class="text-sm text-gray-600">미국의 에너지 독립 정책 및 북미 기반 운영은 지정학적 리스크 속에서 안정성을 제공.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-6">
+                <!-- Risks -->
+                <div class="card p-6 border-t-4 border-red-500">
+                    <h2 class="text-xl font-bold text-red-700 mb-3 flex items-center"><i class="fas fa-exclamation-triangle mr-2"></i>주요 리스크 요인</h2>
+                    <ul class="list-disc list-inside text-gray-700 space-y-2 text-sm">
+                        <li><strong>자금 조달 리스크:</strong> 대규모 확장을 위한 추가 자금 조달의 불확실성.</li>
+                        <li><strong>실행 리스크:</strong> AI 데이터 센터 건설 및 고객사 유치 능력.</li>
+                        <li><strong>비트코인 가격 변동성:</strong> 여전히 현금흐름과 주가에 큰 영향.</li>
+                    </ul>
+                </div>
+                <!-- Company Overview -->
+                <div class="card p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-3">기업 개요</h2>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        비트코인 채굴 사업을 기반으로 AI 클라우드 서비스 및 차세대 AI 데이터 센터 인프라 구축으로 확장하는 디지털 인프라 기업. 캐나다와 미국 텍사스에 대규모 데이터 센터를 직접 운영.
+                    </p>
+                </div>
+                <!-- Profitability Snapshot -->
+                <div class="card p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-3">수익성 Snapshot</h2>
+                    <div class="space-y-3">
+                        <div class="text-center">
+                            <p class="text-3xl font-bold text-purple-600">97%</p>
+                            <p class="text-sm font-semibold text-gray-600">AI 클라우드 하드웨어 이익 마진</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-3xl font-bold text-green-600">$41k</p>
+                            <p class="text-sm font-semibold text-gray-600">BTC 채굴당 낮은 올인원 현금 비용</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disclaimer -->
+        <footer class="disclaimer">
+            <strong>면책 조항:</strong> 이 보고서는 제공된 자료와 공개된 정보를 바탕으로 작성되었으며, 투자 추천이나 권유를 목적으로 하지 않습니다. 모든 투자의 책임은 투자자 본인에게 있으며, 투자 결정은 본인의 판단 하에 신중하게 이루어져야 합니다.
+        </footer>
+    </div>
+
+</body>
+</html>

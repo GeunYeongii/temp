@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IREN Limited (NASDAQ: IREN) 기업 분석 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: 1px solid #e5e7eb;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+        .kpi-value {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: #111827;
+        }
+        .kpi-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        .growth-positive {
+            color: #10b981;
+        }
+        .growth-negative {
+            color: #ef4444;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 1.5rem;
+        }
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        .tag-blue { background-color: #dbeafe; color: #1e40af; }
+        .tag-green { background-color: #d1fae5; color: #065f46; }
+        .tag-orange { background-color: #ffedd5; color: #9a3412; }
+        .tab-button {
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        .tab-button.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="mb-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-gray-800">IREN Limited (NASDAQ: IREN)</h1>
+                    <p class="text-lg text-gray-500 mt-1">기업 분석 대시보드: 비트코인 채굴과 AI 인프라의 융합</p>
+                </div>
+                <div class="mt-4 sm:mt-0 text-right">
+                    <div class="flex items-center justify-end">
+                        <span class="text-4xl font-extrabold text-blue-600">$10.47</span>
+                        <span class="text-lg font-semibold text-gray-700 ml-2">USD</span>
+                    </div>
+                    <p class="text-sm text-gray-500">2025년 6월 21일 기준</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left Column -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- KPI Section -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="card p-4 flex flex-col justify-between">
+                        <p class="kpi-label">시가총액</p>
+                        <p class="kpi-value">~$2.53B</p>
+                    </div>
+                    <div class="card p-4 flex flex-col justify-between">
+                        <p class="kpi-label">분기 매출 (25년 1분기)</p>
+                        <p class="kpi-value">$148.1M</p>
+                        <p class="text-sm font-bold growth-positive">▲ 24% (QoQ)</p>
+                    </div>
+                    <div class="card p-4 flex flex-col justify-between">
+                        <p class="kpi-label">분기 순이익 (25년 1분기)</p>
+                        <p class="kpi-value">$24.2M</p>
+                        <p class="text-sm font-bold growth-positive">▲ 28% (QoQ)</p>
+                    </div>
+                    <div class="card p-4 flex flex-col justify-between">
+                        <p class="kpi-label">Adj. EBITDA 마진</p>
+                        <p class="kpi-value">56%</p>
+                        <p class="text-sm font-bold growth-positive">▲ 4%p (QoQ)</p>
+                    </div>
+                </div>
+
+                <!-- Business Analysis -->
+                <div class="card p-6">
+                    <h2 class="section-title">핵심 사업 분석</h2>
+                    <div class="flex border-b border-gray-200">
+                        <button class="tab-button active" onclick="openTab(event, 'bitcoin')">비트코인 채굴</button>
+                        <button class="tab-button" onclick="openTab(event, 'ai-cloud')">AI 클라우드</button>
+                        <button class="tab-button" onclick="openTab(event, 'ai-dc')">AI 데이터 센터</button>
+                    </div>
+                    <div id="bitcoin" class="tab-content active mt-4 space-y-2 text-gray-700">
+                        <p><i class="fas fa-coins fa-fw mr-2 text-yellow-500"></i><strong>견고한 현금 흐름 창출:</strong> AI 사업 확장의 기반</p>
+                        <p><i class="fas fa-tachometer-alt fa-fw mr-2 text-blue-500"></i><strong>목표 용량:</strong> 50 EH/s (2025.06 까지)</p>
+                        <p><i class="fas fa-bolt fa-fw mr-2 text-green-500"></i><strong>경쟁 우위:</strong> 세계 최저 수준의 전력 비용 (Childress 3.3c/kWh)</p>
+                    </div>
+                    <div id="ai-cloud" class="tab-content mt-4 space-y-2 text-gray-700">
+                        <p><i class="fas fa-server fa-fw mr-2 text-purple-500"></i><strong>고성장 사업:</strong> IREN Cloud™를 통한 AI 인프라 확장</p>
+                        <p><i class="fas fa-microchip fa-fw mr-2 text-green-500"></i><strong>배포 현황:</strong> NVIDIA H100/H200 GPU 1,896개 배포 완료</p>
+                        <p><i class="fas fa-chart-line fa-fw mr-2 text-indigo-500"></i><strong>높은 수익성:</strong> 하드웨어 이익률 97% 기록</p>
+                        <p><i class="fas fa-dollar-sign fa-fw mr-2 text-teal-500"></i><strong>연간 매출:</strong> 2,800만 달러 돌파 및 지속 성장 중</p>
+                    </div>
+                    <div id="ai-dc" class="tab-content mt-4 space-y-2 text-gray-700">
+                         <p><i class="fas fa-building fa-fw mr-2 text-cyan-500"></i><strong>미래 성장 동력:</strong> 대규모 액체 냉각 AI 데이터 센터 구축</p>
+                         <p><i class="fas fa-calendar-alt fa-fw mr-2 text-blue-500"></i><strong>Horizon 1:</strong> 50MW 액체 냉각, 2025년 4분기 완공 목표</p>
+                         <p><i class="fas fa-water fa-fw mr-2 text-sky-500"></i><strong>Sweetwater 1:</strong> 1.4GW 대규모 부지, 2026년 4월 가동 예정</p>
+                    </div>
+                </div>
+                
+                <!-- Financials -->
+                <div class="card p-6">
+                    <h2 class="section-title">재무 분석 (25년 1분기 기준)</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="font-bold text-lg mb-2 text-gray-800">손익 성장 추이 (QoQ)</h3>
+                            <div class="space-y-3">
+                                <div class="w-full bg-gray-200 rounded-full h-6">
+                                    <div class="bg-blue-500 h-6 rounded-full text-center text-white text-xs font-bold flex items-center justify-center" style="width: 100%;">매출: 1억 4,810만 달러 (+24%)</div>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-6">
+                                    <div class="bg-green-500 h-6 rounded-full text-center text-white text-xs font-bold flex items-center justify-center" style="width: 16.3%;">순이익: 2,420만 달러 (+28%)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg mb-2 text-gray-800">재무 상태</h3>
+                            <div class="space-y-2 text-sm">
+                                <p class="flex justify-between"><span>총 자산</span> <span class="font-bold">$19.9억</span></p>
+                                <p class="flex justify-between"><span>총 부채</span> <span class="font-bold">$5.6억</span></p>
+                                <p class="flex justify-between"><span>총 자본</span> <span class="font-bold">$14.3억</span></p>
+                                <p class="flex justify-between font-semibold text-blue-600"><span>부채비율</span> <span class="font-bold">39.6% (양호)</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-6">
+                <!-- Investment Thesis -->
+                <div class="card p-6">
+                    <h2 class="section-title">투자 종합 의견</h2>
+                    <div class="text-center mb-4">
+                        <span class="tag bg-blue-100 text-blue-800 text-lg px-6 py-2">매수 (Buy)</span>
+                    </div>
+                    <p class="text-gray-600 leading-relaxed">
+                        비트코인 채굴의 안정적 현금 흐름을 바탕으로 <strong class="text-gray-800">AI 데이터 센터라는 고성장 시장에 성공적으로 진입 중.</strong> AI 사업의 잠재력이 아직 주가에 충분히 반영되지 않아 <strong class="text-gray-800">중장기적 상승 여력이 높다고 판단.</strong>
+                    </p>
+                </div>
+
+                <!-- Technical Analysis -->
+                <div class="card p-6">
+                    <h2 class="section-title">기술적 분석</h2>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <i class="fas fa-chart-line fa-fw text-green-500 mr-3 text-xl"></i>
+                            <div>
+                                <p class="font-bold text-gray-800">추세: 상승 전환 초기 국면</p>
+                                <p class="text-sm text-gray-600">이동평균선 정배열 전환 가능성</p>
+                            </div>
+                        </div>
+                         <div class="flex items-center">
+                            <i class="fas fa-signal fa-fw text-blue-500 mr-3 text-xl"></i>
+                            <div>
+                                <p class="font-bold text-gray-800">보조지표: 긍정적 신호</p>
+                                <p class="text-sm text-gray-600">RSI 상승 여력 존재, MACD 매수 신호</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-ruler-horizontal fa-fw text-gray-500 mr-3 text-xl"></i>
+                            <div>
+                                <p class="font-bold text-gray-800">주요 가격대</p>
+                                <p class="text-sm text-gray-600"><span class="font-semibold text-green-600">지지:</span> $8.00 ~ $9.50 / <span class="font-semibold text-red-600">저항:</span> $12.00 ~ $14.00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SWOT Analysis -->
+                <div class="card p-6">
+                    <h2 class="section-title">강점 및 리스크 (SWOT)</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="font-bold text-green-600 mb-1"><i class="fas fa-check-circle mr-2"></i>강점 & 기회 (Strengths & Opportunities)</h3>
+                            <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+                                <li>저비용/고효율 비트코인 채굴 운영</li>
+                                <li>AI 인프라 전환 능력 및 기술 전문성</li>
+                                <li>폭발적으로 성장하는 AI 데이터 센터 시장</li>
+                                <li>액체 냉각 기술의 선도적 위치 확보 가능성</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-red-600 mb-1"><i class="fas fa-exclamation-triangle mr-2"></i>약점 & 위협 (Weaknesses & Threats)</h3>
+                            <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+                                <li>대규모 투자에 따른 자금 조달 리스크</li>
+                                <li>비트코인 가격 변동성에 따른 실적 영향</li>
+                                <li>AI 데이터 센터 및 암호화폐 관련 규제 불확실성</li>
+                                <li>심화되는 시장 경쟁</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trading Strategy -->
+                <div class="card p-6 bg-gray-800 text-white">
+                     <h2 class="text-xl font-bold mb-3 border-b border-gray-600 pb-2">투자 전략</h2>
+                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
+                         <div>
+                             <p class="text-sm font-semibold text-blue-300">매수 구간</p>
+                             <p class="text-lg font-bold">현재가 ~ $9.50</p>
+                         </div>
+                         <div>
+                             <p class="text-sm font-semibold text-red-300">손절 라인</p>
+                             <p class="text-lg font-bold">$8.00 이탈 시</p>
+                         </div>
+                         <div class="sm:col-span-2">
+                             <p class="text-sm font-semibold text-green-300">목표가</p>
+                             <p class="text-lg font-bold">단기 $14 / 중장기 $20+</p>
+                         </div>
+                     </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openTab(event, tabName) {
+            let i, tabcontent, tabbuttons;
+            const parent = event.currentTarget.closest('.card');
+            tabcontent = parent.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tabbuttons = parent.getElementsByClassName("tab-button");
+            for (i = 0; i < tabbuttons.length; i++) {
+                tabbuttons[i].className = tabbuttons[i].className.replace(" active", "");
+            }
+            parent.querySelector('#' + tabName).style.display = "block";
+            event.currentTarget.className += " active";
+        }
+    </script>
+</body>
+</html>

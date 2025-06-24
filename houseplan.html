@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리의 내 집 마련 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8fafc; /* Tailwind's gray-50 */
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* shadow-md */
+            padding: 1.5rem; /* p-6 */
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">우리의 내 집 마련 대시보드 🏡</h1>
+            <p class="mt-2 text-lg text-gray-600">두 사람의 미래를 위한 재정 계획을 한눈에 살펴보세요.</p>
+        </header>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- Financial Profile -->
+            <div class="md:col-span-2 card">
+                <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">📊 우리의 재정 프로필</h2>
+                <div class="flex flex-col sm:flex-row justify-around items-center text-center space-y-4 sm:space-y-0">
+                    <div class="w-full sm:w-1/2">
+                        <p class="text-sm text-gray-500 mb-1">연 합산 소득</p>
+                        <p class="text-2xl font-bold text-indigo-600">약 8,000 ~ 9,000 만원</p>
+                    </div>
+                    <div class="w-full sm:w-1/2">
+                        <p class="text-sm text-gray-500 mb-1">총 보유 자산 (저축액)</p>
+                        <p class="text-2xl font-bold text-teal-600">약 5,000 ~ 7,000 만원</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Purchasable Home Price -->
+            <div class="md:col-span-2 card text-center">
+                 <h2 class="text-xl font-bold text-gray-700 mb-4">🏠 구매 가능 주택 가격 (현실적 목표)</h2>
+                 <div class="bg-gray-100 p-6 rounded-lg">
+                    <p class="text-3xl sm:text-4xl font-bold text-gray-800">
+                        <span class="text-blue-600">3억 5천만원</span> ~ <span class="text-blue-600">4억 5천만원</span>
+                    </p>
+                    <p class="mt-2 text-gray-600">보유 자산, DSR 규제, 안정적인 생활 유지를 모두 고려한 범위입니다.</p>
+                 </div>
+            </div>
+
+            <!-- Scenario Comparison -->
+            <div class="md:col-span-2 card">
+                <h2 class="text-xl font-bold text-gray-700 mb-4">⚖️ 시나리오별 비교 분석</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b">
+                                <th class="p-3 font-semibold text-gray-600">구분</th>
+                                <th class="p-3 text-center font-semibold text-green-700">① 안정 지향 플랜</th>
+                                <th class="p-3 text-center font-semibold text-orange-700">② 적극 지향 플랜</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b">
+                                <td class="p-3 font-medium">총 주택 가격</td>
+                                <td class="p-3 text-center font-bold text-lg">3억 5,000만원</td>
+                                <td class="p-3 text-center font-bold text-lg">4억 5,000만원</td>
+                            </tr>
+                            <tr class="border-b bg-gray-50">
+                                <td class="p-3 font-medium">보유 자산 (초기 투입)</td>
+                                <td class="p-3 text-center" colspan="2">7,000만원</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="p-3 font-medium">필요 대출 원금</td>
+                                <td class="p-3 text-center">2억 8,000만원</td>
+                                <td class="p-3 text-center">3억 8,000만원</td>
+                            </tr>
+                            <tr class="bg-blue-50 border-b">
+                                <td class="p-3 font-bold text-blue-800">월 상환 예상액*</td>
+                                <td class="p-3 text-center font-extrabold text-2xl text-blue-700">약 142만원</td>
+                                <td class="p-3 text-center font-extrabold text-2xl text-blue-700">약 193만원</td>
+                            </tr>
+                             <tr>
+                                <td class="p-3 font-medium">소득 대비 상환 비율</td>
+                                <td class="p-3 text-center"><span class="badge bg-green-100 text-green-800">매우 안정 (약 20%)</span></td>
+                                <td class="p-3 text-center"><span class="badge bg-orange-100 text-orange-800">관리 가능 (약 27%)</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-xs text-gray-500 mt-3 text-right">* 대출 금리 4.5%, 30년 원리금균등상환 기준이며 실제 금리에 따라 달라질 수 있습니다.</p>
+            </div>
+            
+            <!-- Monthly Cost Breakdown -->
+            <div class="card">
+                <h2 class="text-xl font-bold text-gray-700 mb-4">💰 월 예상 주거 비용 (안정 플랜 기준)</h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">대출 원리금 상환</span>
+                        <span class="font-bold text-lg">약 142 만원</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 75%"></div>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">관리비, 공과금 등</span>
+                        <span class="font-bold text-lg">약 30 ~ 50 만원</span>
+                    </div>
+                     <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-teal-500 h-2.5 rounded-full" style="width: 25%"></div>
+                    </div>
+
+                    <div class="border-t pt-4 mt-4 flex justify-between items-center">
+                        <span class="text-xl font-bold text-gray-800">총 합계</span>
+                        <span class="font-extrabold text-xl text-red-600">약 172 ~ 192 만원</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Takeaways -->
+            <div class="card">
+                <h2 class="text-xl font-bold text-gray-700 mb-4">✨ 꼭 기억해야 할 점들</h2>
+                <ul class="space-y-3 list-disc list-inside text-gray-700">
+                    <li><span class="font-semibold">무리하지 않는 선에서 시작하기:</span> 월 상환 부담이 적어야 생활의 질을 유지하고 추가 저축이 가능해요.</li>
+                    <li><span class="font-semibold">정부 지원 정책 적극 활용:</span> 신생아 특례, 신혼부부/생애최초 디딤돌 대출 등 저금리 상품을 꼭 확인하세요.</li>
+                    <li><span class="font-semibold">금리 변동성 대비:</span> 현재 금리가 높은 편이에요. 금리 상승 가능성을 염두에 두고 계획을 세워야 해요.</li>
+                    <li><span class="font-semibold">비상 자금은 필수:</span> 대출 상환 외 생활비와 예상치 못한 지출을 위한 비상금을 꼭 마련해두세요.</li>
+                    <li><span class="font-semibold">장기적인 관점:</span> 우리의 미래 라이프스타일(결혼, 자녀 계획 등) 변화를 고려해 위치와 크기를 선택해요.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

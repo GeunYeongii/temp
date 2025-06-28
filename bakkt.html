@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>백트 홀딩스(BKKT) 인터랙티브 분석</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A narrative-driven, single-page application that guides the user through Bakkt's story. It starts with a summary (The Thesis), details the crisis (The Crisis), explains the new strategy (The Pivot), presents the harsh numbers (Financials), analyzes the new market (Competition), and concludes with a balanced view (Investment Thesis). This narrative flow, supported by a sticky navigation bar, is more engaging than a static report and helps users understand the cause-and-effect of Bakkt's situation. Key interactions include interactive charts to visualize critical data points (like the 'profit illusion' and revenue loss) and a tabbed interface for competitor analysis, making complex comparisons digestible. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Core thesis (high-risk turnaround). Goal: Inform/Hook. Viz: Key metric cards. Interaction: Static display. Justification: Immediately frames the core conflict. Library: HTML/Tailwind.
+        - Report Info: Customer loss & 'going concern' warning. Goal: Show Change/Impact. Viz: HTML/CSS timeline and a Chart.js Bar Chart for revenue loss. Interaction: Hover on timeline, tooltips on chart. Justification: Visually tells the story of the crisis and quantifies its biggest impact. Library: Chart.js, HTML/Tailwind.
+        - Report Info: Financials (Operating Loss vs. Net Income, Cash Burn). Goal: Inform/Debunk. Viz: Key stat cards and a grouped Bar Chart from Chart.js. Interaction: Tooltips explaining the 'profit illusion'. Justification: Directly addresses and clarifies the most misleading financial point in the report. Library: Chart.js, HTML/Tailwind.
+        - Report Info: Competitor analysis (Bakkt, Fireblocks, etc.). Goal: Compare/Organize. Viz: Tabbed interface. Interaction: Click to switch between competitors. Justification: Allows for easy, direct comparison of features and regulatory status without overwhelming the user. Library: Vanilla JS, HTML/Tailwind.
+        - Report Info: Bull vs. Bear case. Goal: Compare/Conclude. Viz: Two-column layout with summary cards. Interaction: Static display. Justification: Provides a clear, final summary of the investment decision points. Library: HTML/Tailwind.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #FDFBF6;
+            color: #333;
+        }
+        .accent-color { color: #E27D60; }
+        .bg-accent { background-color: #E27D60; }
+        .bg-secondary { background-color: #f0f4f8; }
+        .text-subtle { color: #4E6E81; }
+        .border-accent { border-color: #E27D60; }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 45vh;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+                max-height: 50vh;
+            }
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        .nav-active {
+            color: #E27D60;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-sm shadow-md">
+        <div class="container mx-auto px-4">
+            <nav class="flex items-center justify-between h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-subtle">
+                    Bakkt <span class="text-gray-400 font-light">(BKKT)</span>
+                </h1>
+                <div class="hidden md:flex space-x-6 text-sm font-medium">
+                    <a href="#summary" class="nav-link hover:text-accent transition-colors">요약</a>
+                    <a href="#crisis" class="nav-link hover:text-accent transition-colors">위기의 연대기</a>
+                    <a href="#pivot" class="nav-link hover:text-accent transition-colors">턴어라운드 청사진</a>
+                    <a href="#financials" class="nav-link hover:text-accent transition-colors">재무 분석</a>
+                    <a href="#competition" class="nav-link hover:text-accent transition-colors">경쟁 환경</a>
+                    <a href="#thesis" class="nav-link hover:text-accent transition-colors">투자 논거</a>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="bg-gray-100 border border-gray-300 rounded-md p-2 text-sm">
+                        <option value="#summary">요약</option>
+                        <option value="#crisis">위기의 연대기</option>
+                        <option value="#pivot">턴어라운드 청사진</option>
+                        <option value="#financials">재무 분석</option>
+                        <option value="#competition">경쟁 환경</option>
+                        <option value="#thesis">투자 논거</option>
+                    </select>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-16">
+
+        <!-- Section 1: Summary -->
+        <section id="summary" class="text-center mb-20 md:mb-32 scroll-mt-20">
+            <h2 class="text-3xl md:text-5xl font-bold mb-4">
+                존폐 위기 속 <span class="accent-color">고위험 턴어라운드</span>
+            </h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600 mb-10">
+                백트 홀딩스는 핵심 고객사 이탈과 파산 경고로 존폐의 기로에 섰습니다. 이제 회사는 '서비스형 암호화폐(CaaS)' 모델로의 전면적인 피벗을 통해 생존을 건 도박을 시작했습니다. 이 투자는 성공 시 막대한 수익을, 실패 시 전액 손실을 의미하는 극단적인 벤처 캐피탈형 베팅입니다.
+            </p>
+            <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-red-400">
+                    <h3 class="font-bold text-xl mb-2">재앙적 위기</h3>
+                    <p class="text-gray-600 text-sm">총 매출의 73%를 차지하던 핵심 고객사 이탈, '계속기업' 존속 불확실성 경고로 파산 위험이 현실화되었습니다.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-blue-400">
+                    <h3 class="font-bold text-xl mb-2">전면적 피벗</h3>
+                    <p class="text-gray-600 text-sm">DTR과의 파트너십을 통해 기존 사업을 버리고 핀테크 기업에 암호화폐 인프라를 제공하는 CaaS 모델로 전환 중입니다.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-yellow-400">
+                    <h3 class="font-bold text-xl mb-2">극심한 재무 압박</h3>
+                    <p class="text-gray-600 text-sm">보유 현금을 초과하는 현금 소진율로 생존을 위해 막대한 규모의 유상증자가 불가피하며, 이는 심각한 주주가치 희석을 의미합니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: The Crisis -->
+        <section id="crisis" class="mb-20 md:mb-32 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">위기의 연대기: 추락의 서사</h2>
+            <p class="text-center text-lg text-gray-600 mb-12 max-w-3xl mx-auto">ICE의 총아로 불리던 백트는 어떻게 벼랑 끝까지 몰렸을까요? 결정적인 사건들은 회사의 기반을 송두리째 흔들었습니다.</p>
+            
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h3 class="font-bold text-2xl mb-6 text-subtle">붕괴의 도미노</h3>
+                    <div class="relative pl-8 border-l-2 border-gray-200">
+                        <div class="mb-10">
+                            <div class="absolute w-6 h-6 bg-red-500 rounded-full -left-3 border-4 border-white"></div>
+                            <h4 class="font-bold text-lg">핵심 고객사 이탈 (2025년 3월)</h4>
+                            <p class="text-sm text-gray-600 mt-1">암호화폐 서비스 매출의 74%를 차지하던 위불(Webull)과의 계약 종료. 이는 예상 총매출의 73% 손실을 의미하는 치명타였습니다.</p>
+                        </div>
+                        <div class="mb-10">
+                            <div class="absolute w-6 h-6 bg-yellow-500 rounded-full -left-3 border-4 border-white"></div>
+                            <h4 class="font-bold text-lg">'계속기업' 불확실성 경고 (2024년-2025년)</h4>
+                            <p class="text-sm text-gray-600 mt-1">만성적인 영업손실과 현금 부족으로 회계감사인이 '파산 가능성'을 공식적으로 경고했습니다. 이는 단순한 위험이 아닌, 현재진행형 위기입니다.</p>
+                        </div>
+                        <div class="mb-10">
+                            <div class="absolute w-6 h-6 bg-orange-500 rounded-full -left-3 border-4 border-white"></div>
+                            <h4 class="font-bold text-lg">NYSE 상장 규정 미준수 (2024년 3월)</h4>
+                            <p class="text-sm text-gray-600 mt-1">주가가 30거래일 연속 1달러 미만으로 하락하며 상장 폐지 위기에 직면했습니다. 시장의 신뢰가 완전히 붕괴되었음을 보여주는 신호입니다.</p>
+                        </div>
+                        <div>
+                            <div class="absolute w-6 h-6 bg-gray-500 rounded-full -left-3 border-4 border-white"></div>
+                            <h4 class="font-bold text-lg">집단 소송 제기</h4>
+                            <p class="text-sm text-gray-600 mt-1">투자자들은 회사가 핵심 고객사에 대한 과도한 의존도를 숨겼다며 집단 소송을 제기, 법적 리스크가 현실화되었습니다.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                     <h3 class="font-bold text-2xl mb-4 text-center text-subtle">매출 74% 증발의 충격</h3>
+                     <p class="text-center text-sm text-gray-500 mb-4">위불(Webull) 계약 종료가 백트의 암호화폐 사업에 미친 파괴적인 영향을 시각적으로 확인해 보세요.</p>
+                     <div class="chart-container">
+                        <canvas id="revenueLossChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: The Pivot -->
+        <section id="pivot" class="mb-20 md:mb-32 scroll-mt-20 bg-secondary -mx-4 px-4 py-16">
+            <div class="container mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">턴어라운드 청사진: 회사의 명운을 건 피벗</h2>
+                <p class="text-center text-lg text-gray-600 mb-12 max-w-3xl mx-auto">절체절명의 위기 속, 백트는 새로운 리더십과 기술을 중심으로 '서비스형 암호화폐(CaaS)'라는 새로운 항로를 개척하고 있습니다.</p>
+                <div class="bg-white p-8 rounded-xl shadow-xl grid md:grid-cols-5 gap-8">
+                    <div class="md:col-span-3">
+                        <h3 class="font-bold text-2xl mb-4 accent-color">핵심 전략: 서비스형 암호화폐(CaaS)</h3>
+                        <p class="text-gray-700 mb-4">백트는 더 이상 소비자를 직접 상대하지 않습니다. 대신 네오뱅크, 핀테크 등 다른 기업들이 자체적으로 복잡한 시스템을 구축할 필요 없이, 백트의 인프라를 통해 손쉽게 암호화폐 거래, 수탁, 결제 서비스를 고객에게 제공할 수 있도록 지원하는 B2B 모델에 집중합니다.</p>
+                        <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                            <p class="font-semibold text-blue-800">시장 기회: 2033년까지 연평균 58% 성장, 약 2,000억 달러 규모로 예상되는 거대 시장을 목표로 합니다. 이는 백트가 생존을 넘어 성장할 수 있는 잠재적 기회입니다.</p>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2 bg-gray-50 p-6 rounded-lg border">
+                        <h3 class="font-bold text-xl mb-3 text-subtle">피벗의 핵심축: DTR & 새 CEO</h3>
+                        <p class="text-sm text-gray-600 mb-3">이 모든 전략은 AI 기반 결제 기술을 보유한 DTR과의 파트너십에 달려있습니다. DTR 창업자 <span class="font-bold">악샤이 나헤타</span>가 공동 CEO로 부임한 것은 사실상의 경영권 이양을 의미합니다.</p>
+                        <p class="text-sm font-semibold text-gray-800">DTR의 기술 'AmalgamOS'는 국경 간 결제와 블록체인을 연결하는 AI 기반 솔루션으로, 턴어라운드의 성패를 가를 핵심 기술입니다.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Financials -->
+        <section id="financials" class="mb-20 md:mb-32 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">재무 분석: 가혹한 현실</h2>
+            <p class="text-center text-lg text-gray-600 mb-12 max-w-3xl mx-auto">턴어라운드의 청사진 이면에는 생존 자체를 위협하는 냉혹한 재무 지표들이 존재합니다. 숫자는 거짓말을 하지 않습니다.</p>
+            <div class="grid md:grid-cols-3 gap-6 mb-12">
+                <div class="text-center bg-white p-6 rounded-xl shadow-lg">
+                    <div class="text-sm font-bold text-gray-500">25년 1분기 영업활동 현금흐름</div>
+                    <div class="text-4xl font-bold text-red-600 mt-2">-$1.01억</div>
+                    <p class="text-xs text-gray-500 mt-2">핵심 사업에서 막대한 현금이 유출되고 있음을 의미합니다.</p>
+                </div>
+                <div class="text-center bg-white p-6 rounded-xl shadow-lg">
+                    <div class="text-sm font-bold text-gray-500">25년 3월 말 보유 현금</div>
+                    <div class="text-4xl font-bold text-orange-600 mt-2">$2,470만</div>
+                    <p class="text-xs text-gray-500 mt-2">현재 현금 소진 속도를 감안할 때, 외부 자금 수혈 없이는 생존이 불가능한 수준입니다.</p>
+                </div>
+                <div class="text-center bg-white p-6 rounded-xl shadow-lg">
+                     <div class="text-sm font-bold text-gray-500">생존 전략</div>
+                    <div class="text-4xl font-bold text-green-700 mt-2">$10억</div>
+                    <p class="text-xs text-gray-500 mt-2">최대 10억 달러 규모의 자금 조달 계획(일괄등록)은 생존을 위한 필수 조건이나, 막대한 주주가치 희석을 동반합니다.</p>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-xl">
+                <h3 class="font-bold text-2xl mb-2 text-center text-subtle">흑자의 착시: 2025년 1분기 실적 해부</h3>
+                <p class="text-center text-sm text-gray-500 mb-6 max-w-2xl mx-auto">백트는 1분기에 1,620만 달러의 '순이익'을 보고했지만, 이는 실제 영업 성과가 아닌 회계적 착시입니다. 실제 영업 손실과의 격차를 통해 재무 건전성의 진실을 확인하세요.</p>
+                <div class="chart-container">
+                    <canvas id="profitIllusionChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Competition -->
+        <section id="competition" class="mb-20 md:mb-32 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">새로운 전쟁터: CaaS 경쟁 환경</h2>
+            <p class="text-center text-lg text-gray-600 mb-12 max-w-3xl mx-auto">백트의 피벗은 이미 강력한 경쟁자들이 포진한 혼잡한 시장으로의 진입을 의미합니다. 생존을 위해서는 이들과의 차별화가 필수적입니다.</p>
+            <div class="w-full max-w-4xl mx-auto">
+                <div class="mb-4 flex justify-center border-b border-gray-200">
+                    <button data-target="bakkt" class="tab-btn px-6 py-3 text-lg font-medium border-b-2 border-accent text-accent">Bakkt</button>
+                    <button data-target="fireblocks" class="tab-btn px-6 py-3 text-lg font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700">Fireblocks</button>
+                    <button data-target="zerohash" class="tab-btn px-6 py-3 text-lg font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700">Zero Hash</button>
+                    <button data-target="paxos" class="tab-btn px-6 py-3 text-lg font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700">Paxos</button>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg transition-all duration-300">
+                    <div id="bakkt" class="tab-content">
+                        <h3 class="text-2xl font-bold mb-3">Bakkt</h3>
+                        <p class="text-gray-600 mb-4">미국 시장을 위한 턴키 규제 인프라와 DTR의 AI/스테이블코인 기술을 차별점으로 내세웁니다.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><span class="font-semibold">주요 서비스:</span> 거래, 수탁(파트너), 온램프, 스테이블코인 결제</li>
+                            <li><span class="font-semibold">규제 현황:</span> NYDFS 비트라이선스, 50개 주 MTL 보유</li>
+                            <li><span class="font-semibold">강점:</span> 포괄적인 미국 규제 라이선스, DTR의 신기술 잠재력</li>
+                            <li><span class="font-semibold">약점:</span> 후발주자, 불안정한 재무, 검증되지 않은 기술</li>
+                        </ul>
+                    </div>
+                    <div id="fireblocks" class="tab-content hidden">
+                        <h3 class="text-2xl font-bold mb-3">Fireblocks</h3>
+                        <p class="text-gray-600 mb-4">기관용 자체 수탁 기술(MPC) 시장의 선두주자로, 기술 제공에 중점을 둡니다.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><span class="font-semibold">주요 서비스:</span> 기관급 수탁, 재무 관리, 토큰화</li>
+                            <li><span class="font-semibold">규제 현황:</span> 기술 제공업체로서 파트너십을 통해 규제 준수</li>
+                            <li><span class="font-semibold">강점:</span> 압도적인 기술력, 광범위한 기관 네트워크</li>
+                            <li><span class="font-semibold">주요 파트너:</span> Worldpay, ABN AMRO, Polygon</li>
+                        </ul>
+                    </div>
+                    <div id="zerohash" class="tab-content hidden">
+                        <h3 class="text-2xl font-bold mb-3">Zero Hash</h3>
+                        <p class="text-gray-600 mb-4">백엔드와 규제 복잡성을 모두 처리하는 완전한 턴키 B2B2C 솔루션을 제공합니다.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><span class="font-semibold">주요 서비스:</span> 임베디드 암호화폐 매매, 수탁, 유동성 제공</li>
+                            <li><span class="font-semibold">규제 현황:</span> NYDFS 비트라이선스, 51개 미국 관할권 라이선스</li>
+                            <li><span class="font-semibold">강점:</span> 백트와 가장 유사한 비즈니스 모델, 강력한 규제 기반</li>
+                             <li><span class="font-semibold">주요 파트너:</span> Sardine</li>
+                        </ul>
+                    </div>
+                    <div id="paxos" class="tab-content hidden">
+                        <h3 class="text-2xl font-bold mb-3">Paxos</h3>
+                        <p class="text-gray-600 mb-4">NYDFS 규제를 받는 신탁회사로서, 스테이블코인 발행과 TradFi와의 깊은 연계가 강점입니다.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><span class="font-semibold">주요 서비스:</span> 스테이블코인(USDP) 발행, 토큰화, 수탁</li>
+                            <li><span class="font-semibold">규제 현황:</span> NYDFS 신탁 헌장 (비트라이선스보다 엄격)</li>
+                            <li><span class="font-semibold">강점:</span> 최고 수준의 규제 신뢰도, 주요 금융기관과의 파트너십</li>
+                             <li><span class="font-semibold">주요 파트너:</span> PayPal, Mastercard, Mercado Libre</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Thesis -->
+        <section id="thesis" class="scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">투자 논거: 극단적 시나리오</h2>
+            <p class="text-center text-lg text-gray-600 mb-12 max-w-3xl mx-auto">백트에 대한 투자는 중간 지대가 없습니다. 성공은 대박을, 실패는 파산을 의미합니다. 양 극단의 시나리오를 신중히 검토해야 합니다.</p>
+            <div class="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                <div class="bg-white p-8 rounded-xl shadow-xl border-t-8 border-green-500">
+                    <h3 class="text-2xl font-bold mb-4 text-green-700">긍정적 시나리오 (Bull Case)</h3>
+                    <p class="text-gray-700 mb-4">승리로 가는 좁은 길은 존재합니다. 모든 퍼즐이 완벽하게 맞춰진다면, 잠재력은 폭발적일 수 있습니다.</p>
+                    <ul class="space-y-3">
+                        <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">✓</span><span>DTR 기술이 시장의 게임 체인저가 되고, 성공적인 대규모 자금 조달로 운영 안정성을 확보합니다.</span></li>
+                        <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">✓</span><span>강력한 규제 라이선스를 바탕으로 미국 핀테크 시장 점유율을 빠르게 확보합니다.</span></li>
+                        <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">✓</span><span>CaaS 사업이 손익분기점을 넘어 수익성을 달성하며, 현재의 헐값 수준에서 주가가 대대적으로 재평가됩니다.</span></li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-xl border-t-8 border-red-500">
+                    <h3 class="text-2xl font-bold mb-4 text-red-700">부정적 시나리오 (Bear Case)</h3>
+                    <p class="text-gray-700 mb-4">현실적으로 더 가능성이 높은 시나리오입니다. 수많은 지뢰가 도사리고 있으며, 하나만 터져도 모든 것이 끝날 수 있습니다.</p>
+                    <ul class="space-y-3">
+                        <li class="flex items-start"><span class="text-red-500 mr-3 mt-1">✗</span><span>파산 전에 충분한 자금을 조달하지 못하거나, 조달 조건이 극도로 희석적이라 주주 가치가 사라집니다.</span></li>
+                        <li class="flex items-start"><span class="text-red-500 mr-3 mt-1">✗</span><span>DTR 기술 통합에 실패하거나, 출시된 제품이 경쟁사 대비 경쟁력이 없습니다.</span></li>
+                        <li class="flex items-start"><span class="text-red-500 mr-3 mt-1">✗</span><span>결국 파산을 신청하고, 모든 주주 가치가 소멸됩니다. (자본 전액 손실)</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-12 bg-amber-50 border-l-4 border-amber-500 text-amber-800 p-6 rounded-r-lg max-w-4xl mx-auto">
+                <h4 class="font-bold text-xl">최종 결론 및 투자 권고</h4>
+                <p class="mt-2">백트 홀딩스는 대부분의 투자자에게 **권장되지 않습니다.** 자본 전액 손실 가능성이 매우 크기 때문입니다. 다만, 이것이 낮은 확률과 높은 보상의 턴어라운드에 베팅하는 것임을 완벽히 이해하고 감수할 수 있는 극소수의 고위험 성향 투자자에게만 투기적 관점에서 고려될 수 있습니다.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto px-4 py-6 text-center text-sm">
+            <p>&copy; 2025 Interactive Analysis. All rights reserved.</p>
+            <p class="text-xs text-gray-400 mt-1">본 자료는 제공된 보고서를 기반으로 제작되었으며, 투자 조언이 아닙니다. 모든 투자 결정의 책임은 투자자 본인에게 있습니다.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Chart.js Default Settings
+            Chart.defaults.font.family = "'Noto Sans KR', sans-serif";
+            Chart.defaults.color = '#333';
+
+            // Revenue Loss Chart
+            const revenueLossCtx = document.getElementById('revenueLossChart').getContext('2d');
+            new Chart(revenueLossCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['기존 암호화폐 서비스 매출', '위불 계약 종료 후 예상 매출'],
+                    datasets: [{
+                        label: '매출 규모',
+                        data: [100, 26],
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(255, 99, 132, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 99, 132, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '암호화폐 서비스 매출 74% 감소 예상',
+                            font: { size: 14 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `상대적 매출: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%'
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                         y: {
+                            ticks: {
+                                font: {
+                                    size: 10
+                                },
+                                autoSkip: false,
+                                maxRotation: 0,
+                                minRotation: 0
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Profit Illusion Chart
+            const profitIllusionCtx = document.getElementById('profitIllusionChart').getContext('2d');
+            new Chart(profitIllusionCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['2025년 1분기 실적 (백만 달러)'],
+                    datasets: [
+                        {
+                            label: '영업 손실 (실제 사업 성과)',
+                            data: [-18.5],
+                            backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '순이익 (회계적 착시 포함)',
+                            data: [16.2],
+                             backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        title: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y) + 'M';
+                                    }
+                                    if(context.dataset.label.includes('순이익')){
+                                        return [label, "  (워런트 부채 평가 이익 등 비현금성 요인)"];
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value + 'M';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Competition Tabs
+            const tabs = document.querySelectorAll('.tab-btn');
+            const contents = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(item => {
+                        item.classList.remove('text-accent', 'border-accent');
+                        item.classList.add('text-gray-500', 'border-transparent');
+                    });
+                    tab.classList.add('text-accent', 'border-accent');
+                    tab.classList.remove('text-gray-500', 'border-transparent');
+
+                    contents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    document.getElementById(tab.dataset.target).classList.remove('hidden');
+                });
+            });
+
+            // Mobile Navigation
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.addEventListener('change', (event) => {
+                window.location.hash = event.target.value;
+            });
+            
+            // Scrollspy for Desktop Navigation
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('nav-active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('nav-active');
+                    }
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>

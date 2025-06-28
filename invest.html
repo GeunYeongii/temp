@@ -1,0 +1,92 @@
+import React from 'react';
+import { LineChart, TrendingUp, TrendingDown, Info, AlertCircle } from 'lucide-react';
+
+// Main App Component
+const App = () => {
+  return (
+    <div className="min-h-screen bg-gray-100 p-4 font-inter">
+      <script src="https://cdn.tailwindcss.com"></script>
+      {/*
+        Removed the problematic Lucide React Icons Load script.
+        The `import` statements at the top of this React file
+        (`import { LineChart, ... } from 'lucide-react';`)
+        are the correct way for a React application to use these components.
+        The environment typically handles these imports directly.
+      */}
+
+      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-xl p-6 md:p-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6 border-b pb-4">
+          <h1 className="text-3xl font-bold text-gray-800 flex items-center">
+            <LineChart className="w-8 h-8 mr-3 text-blue-600" />
+            볼린저밴드 & CCI 스윙 전략 대시보드
+          </h1>
+        </div>
+
+        {/* Strategy Rules */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+            <Info className="w-7 h-7 mr-2 text-gray-600" />
+            스윙 전략 핵심 규칙
+          </h2>
+          <div className="space-y-4">
+            {/* Buy Signal */}
+            <div className="bg-green-50 p-5 rounded-lg shadow-sm border border-green-200">
+              <h3 className="text-xl font-bold text-green-700 mb-2 flex items-center">
+                <TrendingUp className="w-6 h-6 mr-2" /> 매수 (롱) 신호
+              </h3>
+              <ul className="list-disc pl-5 text-gray-700">
+                <li><strong>볼린저밴드 하단 터치:</strong> 주가가 볼린저밴드 하단 밴드에 닿거나 그 아래로 이탈할 때</li>
+                <li><strong>CCI -100선 상향 돌파:</strong> CCI 지표가 -100 이하의 과매도 영역에서 다시 위로 올라올 때</li>
+                <li className="mt-2 text-sm text-green-600 font-medium">
+                  <span className="font-semibold">시사점:</span> 가격이 과도하게 하락하여 반등할 가능성이 높음
+                </li>
+              </ul>
+            </div>
+
+            {/* Sell Signal */}
+            <div className="bg-red-50 p-5 rounded-lg shadow-sm border border-red-200">
+              <h3 className="text-xl font-bold text-red-700 mb-2 flex items-center">
+                <TrendingDown className="w-6 h-6 mr-2" /> 매도 (숏) 신호
+              </h3>
+              <ul className="list-disc pl-5 text-gray-700">
+                <li><strong>볼린저밴드 상단 터치:</strong> 주가가 볼린저밴드 상단 밴드에 닿거나 그 위로 이탈할 때</li>
+                <li><strong>CCI +100선 하향 돌파:</strong> CCI 지표가 +100 이상의 과매수 영역에서 다시 아래로 내려올 때 (또는 과매수 상태 유지 시)</li>
+                <li className="mt-2 text-sm text-red-600 font-medium">
+                  <span className="font-semibold">시사점:</span> 가격이 과도하게 상승하여 하락 반전할 가능성이 높음
+                </li>
+              </ul>
+            </div>
+
+            {/* Reliability */}
+            <div className="bg-blue-50 p-5 rounded-lg shadow-sm border border-blue-200">
+              <h3 className="text-xl font-bold text-blue-700 mb-2 flex items-center">
+                <AlertCircle className="w-6 h-6 mr-2" /> 신뢰도 및 확률
+              </h3>
+              <ul className="list-disc pl-5 text-gray-700">
+                <li><strong>시간봉별 신뢰도:</strong> 일봉 (Daily Chart)에서 가장 신뢰도가 높음</li>
+                <li><strong>단기봉 (4시간봉, 1시간봉):</strong> 시간봉이 짧아질수록 '노이즈' 증가로 신뢰도 하락 및 거짓 신호 가능성 증가</li>
+                <li><strong>예상 승률:</strong> 단타/스윙 매매 시 약 60~70% 확률 기대 (백테스팅 및 경험 기반)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Important Notes */}
+        <div className="p-6 bg-yellow-50 rounded-lg shadow-sm border border-yellow-200">
+          <h2 className="text-2xl font-semibold text-yellow-700 mb-4 flex items-center">
+            <Info className="w-7 h-7 mr-2" /> 중요 사항
+          </h2>
+          <ul className="list-disc pl-5 text-gray-700 space-y-2">
+            <li>이 전략은 <strong>예시</strong>이며, 과거 데이터를 기반으로 한 분석입니다. 미래의 수익을 보장하지 않습니다.</li>
+            <li>항상 <strong>손절매(Stop-loss)</strong> 원칙을 철저히 지켜 리스크를 관리해야 합니다.</li>
+            <li>단일 지표에 의존하기보다, <strong>거래량, 기타 보조지표, 시장 상황(뉴스, 거시경제 등)을 종합적으로 고려</strong>하여 투자 결정을 내리는 것이 중요합니다.</li>
+            <li>본인의 투자 성향과 분석하는 자산의 특성에 맞게 지표의 설정값을 <strong>최적화</strong>하는 것이 좋습니다.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default App;

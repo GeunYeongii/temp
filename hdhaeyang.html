@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HD한국조선해양 기업 분석 대시보드</title>
+    
+    <!-- Tailwind CSS CDN: 스타일링을 위해 필요합니다. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js CDN: 차트 생성을 위해 필요합니다. -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* 다크 모드 기본 배경색과 스크롤바 스타일링 */
+        body {
+            background-color: #030712; /* bg-gray-950 */
+            font-family: 'Pretendard', sans-serif; /* 가독성 좋은 Pretendard 폰트 추천 (시스템 미설치 시 기본 폰트) */
+        }
+        /* 커스텀 스크롤바 (선택 사항) */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937; /* bg-gray-800 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563; /* bg-gray-600 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* bg-gray-500 */
+        }
+    </style>
+</head>
+<body class="text-gray-200">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+
+        <!-- 헤더 -->
+        <header class="mb-8">
+            <div class="flex flex-wrap justify-between items-center gap-4">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">HD한국조선해양 기업 분석 대시보드</h1>
+                    <p class="text-gray-400 mt-1">2025년 7월 1일 기준</p>
+                </div>
+                <div class="border border-green-500/30 bg-green-500/10 rounded-lg px-4 py-2 text-center">
+                    <p class="font-bold text-green-300 text-sm">투자의견</p>
+                    <p class="text-white text-xl font-bold">긍정적 (Positive)</p>
+                </div>
+            </div>
+            <div class="mt-6 bg-gray-900/70 border border-gray-800 rounded-xl p-6 shadow-lg backdrop-blur-sm">
+                 <blockquote class="relative">
+                    <p class="text-gray-300 italic text-sm md:text-base">👩‍💼 "전 세계적인 친환경 규제 강화와 노후 선박 교체 주기에 힘입어 역대급 수주 잔고를 바탕으로 뚜렷한 실적 개선세를 보이고 있습니다. 향후 친환경 선박 기술 경쟁력이 핵심 성장 동력으로 작용할 전망입니다."</p>
+                    <footer class="mt-2 text-right text-cyan-400 font-semibold text-sm">- 기업 분석가 코멘트</footer>
+                 </blockquote>
+            </div>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- 왼쪽 컬럼 -->
+            <div class="lg:col-span-2 flex flex-col gap-6">
+                
+                <!-- 주요 재무 지표 -->
+                <section class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg">
+                    <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        주요 재무 지표 요약
+                    </h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-gray-800/50 p-4 rounded-lg text-center">
+                            <p class="text-sm text-gray-400">주가</p>
+                            <p class="text-2xl font-bold text-white">372,250원</p>
+                            <p class="text-xs text-gray-400 mt-1">2025.07.01 기준</p>
+                        </div>
+                        <div class="bg-gray-800/50 p-4 rounded-lg text-center">
+                            <p class="text-sm text-gray-400">PER</p>
+                            <p class="text-2xl font-bold text-white">약 22.0배</p>
+                            <p class="text-xs text-gray-400 mt-1">2024년 실적 기준</p>
+                        </div>
+                        <div class="bg-gray-800/50 p-4 rounded-lg text-center">
+                            <p class="text-sm text-gray-400">PBR</p>
+                            <p class="text-2xl font-bold text-white">약 2.3배</p>
+                            <p class="text-xs text-gray-400 mt-1">2024년 실적 기준</p>
+                        </div>
+                        <div class="bg-gray-800/50 p-4 rounded-lg text-center">
+                            <p class="text-sm text-gray-400">EPS (2024)</p>
+                            <p class="text-2xl font-bold text-white">16,565원</p>
+                            <p class="text-xs text-green-400 mt-1">주당순이익</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 재무 분석 (탭) -->
+                <section id="financial-analysis" class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg">
+                    <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 00-4-4H3V7h2a4 4 0 004-4v-2m0 16l6-6m-6 6l-6-6m12-2l2 2m-2-2l-2 2"></path></svg>
+                        재무제표 심층 분석
+                    </h2>
+                    <div class="border-b border-gray-700">
+                        <nav class="-mb-px flex space-x-4" aria-label="Tabs">
+                            <button onclick="changeTab('growth')" class="tab-button active-tab" data-tab="growth">성장성</button>
+                            <button onclick="changeTab('profitability')" class="tab-button" data-tab="profitability">수익성</button>
+                            <button onclick="changeTab('stability')" class="tab-button" data-tab="stability">안정성</button>
+                        </nav>
+                    </div>
+                    <div class="mt-6">
+                        <div id="growth" class="tab-content">
+                            <p class="text-sm text-gray-400 mb-4">과거 수주한 고선가 물량의 건조가 본격화되며 매출이 연평균 21.5% 성장했으며, 2024년 영업이익은 408% 폭증하며 완연한 회복세를 보였습니다.</p>
+                            <canvas id="growthChart" height="150"></canvas>
+                        </div>
+                        <div id="profitability" class="tab-content hidden">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-gray-800/50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-cyan-400">영업이익률 (2024)</h4>
+                                    <p class="text-2xl font-bold text-white">5.6%</p>
+                                    <p class="text-xs text-green-400">뚜렷한 수익성 개선</p>
+                                </div>
+                                <div class="bg-gray-800/50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-cyan-400">ROE (2024)</h4>
+                                    <p class="text-2xl font-bold text-white">11.2%</p>
+                                    <p class="text-xs text-green-400">두 자릿수 회복</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 bg-blue-900/30 p-4 rounded-lg border border-blue-500/50">
+                                <p class="text-sm text-blue-200">💡 <strong>수익성 핵심:</strong> 선별적인 수주 전략과 고부가가치 선박 건조 비중 증가가 수익성 개선을 이끌고 있습니다.</p>
+                            </div>
+                        </div>
+                        <div id="stability" class="tab-content hidden">
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-gray-800/50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-cyan-400">부채비율 (2024)</h4>
+                                    <p class="text-2xl font-bold text-white">159.4%</p>
+                                    <p class="text-xs text-yellow-400">점진적 안정화 추세</p>
+                                </div>
+                                <div class="bg-gray-800/50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-cyan-400">유동비율 (2024)</h4>
+                                    <p class="text-2xl font-bold text-white">105.7%</p>
+                                    <p class="text-xs text-green-400">단기 상환 능력 양호</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 bg-orange-900/30 p-4 rounded-lg border border-orange-500/50">
+                                <p class="text-sm text-orange-200">⚠️ <strong>부채비율 해석:</strong> 대규모 수주에 따른 선수금을 부채로 인식하는 조선업 특성이 반영되어 있으며, 점진적으로 개선되고 있습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- SNS 및 언론 분위기 -->
+                <section class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg">
+                    <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                        시장 분위기 분석
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-green-400 mb-3 flex items-center"><svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>긍정적 여론</h3>
+                            <ul class="space-y-2 list-disc list-inside text-sm text-gray-300">
+                                <li>역대급 수주 실적 및 흑자 전환</li>
+                                <li>친환경 선박 시장 선도 기업</li>
+                                <li>증권사들의 긍정적 리포트 및 목표가 상향</li>
+                                <li>"조선업 슈퍼 사이클"에 대한 기대감</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-yellow-400 mb-3 flex items-center"><svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.21 3.03-1.742 3.03H4.42c-1.532 0-2.492-1.696-1.742-3.03l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1-4a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>우려 여론</h3>
+                            <ul class="space-y-2 list-disc list-inside text-sm text-gray-300">
+                                <li>중국 조선업의 저가 공세 및 추격</li>
+                                <li>원자재 가격 상승 및 인력난</li>
+                                <li>환율 및 글로벌 경기 변동성</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 오른쪽 컬럼 -->
+            <div class="lg:col-span-1 flex flex-col gap-6">
+                <!-- 기업 개요 -->
+                <section class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg">
+                    <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                        기업 개요
+                    </h2>
+                    <h3 class="text-lg font-bold text-white">HD한국조선해양 (009540)</h3>
+                    <p class="text-sm text-gray-300 mt-2">HD현대그룹의 조선·해양 사업 부문을 총괄하는 중간 지주회사.</p>
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <h4 class="font-semibold text-cyan-400">자회사</h4>
+                        <p class="text-sm text-gray-300">HD현대중공업, HD현대미포, HD현대삼호</p>
+                    </div>
+                </section>
+
+                <!-- 경쟁력 및 리스크 -->
+                <section class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg">
+                    <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 20.417l4.5-4.5M12 14a2 2 0 100-4 2 2 0 000 4z"></path></svg>
+                        경쟁력 및 리스크
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="font-semibold text-green-400 mb-2">핵심 경쟁 우위</h3>
+                            <ul class="text-sm text-gray-300 space-y-1">
+                                <li class="flex items-start"><span class="mr-2 mt-1">✅</span><span><strong>기술 리더십:</strong> 친환경/디지털 선박 시장 선도</span></li>
+                                <li class="flex items-start"><span class="mr-2 mt-1">✅</span><span><strong>다양한 포트폴리오:</strong> 시장 변동에 유연한 대처</span></li>
+                                <li class="flex items-start"><span class="mr-2 mt-1">✅</span><span><strong>규모의 경제:</strong> 자회사 간 시너지를 통한 원가 경쟁력</span></li>
+                            </ul>
+                        </div>
+                        <div class="pt-4 border-t border-gray-800">
+                            <h3 class="font-semibold text-red-400 mb-2">주요 리스크 요인</h3>
+                            <ul class="text-sm text-gray-300 space-y-1">
+                                <li class="flex items-start"><span class="mr-2 mt-1">🚨</span><span><strong>원자재 가격 변동성:</strong> 후판 가격이 수익성에 영향</span></li>
+                                <li class="flex items-start"><span class="mr-2 mt-1">🚨</span><span><strong>환율 변동:</strong> 수출 비중이 높아 환율에 민감</span></li>
+                                <li class="flex items-start"><span class="mr-2 mt-1">🚨</span><span><strong>글로벌 경기 둔화:</strong> 신규 선박 발주 감소 가능성</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 종합 결론 -->
+                <section class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg">
+                    <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        종합 결론 및 관전 포인트
+                    </h2>
+                    <p class="text-sm text-gray-300 mb-4">과거 불황을 지나 명확한 성장 궤도에 진입. 압도적인 수주 잔고와 친환경 선박 기술 리더십이 향후 성장을 견인할 전망.</p>
+                    <div class="bg-gray-800/50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-cyan-400 mb-2">향후 주목할 포인트</h4>
+                        <ul class="space-y-1 list-disc list-inside text-sm text-gray-300">
+                            <li class="font-bold text-yellow-300">차세대 친환경 선박(암모니아 등) 수주 성과</li>
+                            <li>원자재 가격 및 환율 동향</li>
+                            <li>스마트 조선소를 통한 생산 효율성 증대</li>
+                        </ul>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 탭 전환을 위한 JavaScript
+        function changeTab(tabId) {
+            const container = document.getElementById('financial-analysis');
+            container.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active-tab');
+                button.classList.add('inactive-tab');
+            });
+            container.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            const activeButton = container.querySelector(`[data-tab='${tabId}']`);
+            activeButton.classList.add('active-tab');
+            activeButton.classList.remove('inactive-tab');
+            document.getElementById(tabId).classList.remove('hidden');
+        }
+
+        // 탭 버튼 스타일 정의
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .tab-button { @apply whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-all duration-300; }
+            .active-tab { @apply border-cyan-500 text-cyan-400; }
+            .inactive-tab { @apply border-transparent text-gray-500 hover:text-gray-300 hover:border-gray-500; }
+        `;
+        document.head.appendChild(style);
+
+        // 성장성 분석 차트 생성
+        const ctx = document.getElementById('growthChart').getContext('2d');
+        const growthChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['2022', '2023', '2024'],
+                datasets: [{
+                    label: '매출액 (조원)',
+                    data: [17.30, 21.29, 25.53],
+                    backgroundColor: 'rgba(45, 212, 191, 0.6)', // teal-400
+                    borderColor: 'rgba(45, 212, 191, 1)',
+                    borderWidth: 1,
+                    yAxisID: 'y',
+                }, {
+                    label: '영업이익 (조원)',
+                    data: [-0.35, 0.28, 1.43],
+                    backgroundColor: 'rgba(96, 165, 250, 0.6)', // blue-400
+                    borderColor: 'rgba(96, 165, 250, 1)',
+                    borderWidth: 1,
+                    type: 'line',
+                    yAxisID: 'y1',
+                    tension: 0.3,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'top', labels: { color: '#d1d5db' } },
+                    tooltip: { mode: 'index', intersect: false },
+                },
+                scales: {
+                    x: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } },
+                    y: {
+                        type: 'linear', display: true, position: 'left',
+                        title: { display: true, text: '매출액 (조원)', color: '#d1d5db' },
+                        ticks: { color: '#9ca3af' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    },
+                    y1: {
+                        type: 'linear', display: true, position: 'right',
+                        title: { display: true, text: '영업이익 (조원)', color: '#d1d5db' },
+                        ticks: { color: '#9ca3af' },
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        });
+        
+        // 초기 탭 설정
+        document.addEventListener('DOMContentLoaded', () => {
+            changeTab('growth');
+        });
+    </script>
+</body>
+</html>

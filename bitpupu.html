@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitFuFu (FUFU) 기업 분석 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #111827; /* Dark Gray */
+            color: #E5E7EB; /* Light Gray */
+        }
+        .card {
+            background-color: #1F2937; /* Gray-800 */
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border: 1px solid #374151; /* Gray-700 */
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+        .chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+        .kpi-label {
+            font-size: 0.875rem;
+            color: #9CA3AF; /* Gray-400 */
+        }
+        .kpi-change {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .text-positive {
+            color: #22C55E; /* Green-500 */
+        }
+        .text-negative {
+            color: #EF4444; /* Red-500 */
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #374151;
+            color: #FFFFFF;
+        }
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+        .tag-neutral {
+            background-color: #4B5563;
+            color: #FFFFFF;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-bold text-white">BitFuFu Inc. (NASDAQ: FUFU)</h1>
+                    <p class="text-lg text-gray-400 mt-1">기업 분석 대시보드 (2025년 7월 기준)</p>
+                </div>
+                <div class="mt-4 md:mt-0 text-right">
+                    <span class="tag tag-neutral">투자 의견: 관망 (Neutral)</span>
+                </div>
+            </div>
+            <p class="mt-4 text-gray-300 max-w-4xl">
+                싱가포르에 본사를 둔 비트코인 채굴 기업. 자체 채굴과 클라우드 채굴 솔루션을 제공하며, BITMAIN과의 파트너십을 통해 경쟁 우위를 확보하고 있습니다.
+            </p>
+        </header>
+
+        <!-- Key Performance Indicators -->
+        <section class="mb-8">
+            <h2 class="section-title">핵심 지표 (2025년 6월 업데이트 기준)</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <!-- BTC 보유량 -->
+                <div class="card text-center">
+                    <div class="flex justify-center items-center mb-2">
+                        <i data-lucide="bitcoin" class="w-8 h-8 text-yellow-400"></i>
+                    </div>
+                    <p class="kpi-label">BTC 보유량 (25년 3월)</p>
+                    <p class="kpi-value">1,835</p>
+                    <p class="kpi-change text-positive">+71.2% YoY (vs 1,072)</p>
+                </div>
+                <!-- 총 해시레이트 -->
+                <div class="card text-center">
+                    <div class="flex justify-center items-center mb-2">
+                        <i data-lucide="gauge-circle" class="w-8 h-8 text-cyan-400"></i>
+                    </div>
+                    <p class="kpi-label">총 해시레이트</p>
+                    <p class="kpi-value">36.2 <span class="text-2xl">EH/s</span></p>
+                    <p class="kpi-change text-positive">+6.2% MoM</p>
+                </div>
+                <!-- 전력 용량 -->
+                <div class="card text-center">
+                    <div class="flex justify-center items-center mb-2">
+                        <i data-lucide="zap" class="w-8 h-8 text-orange-400"></i>
+                    </div>
+                    <p class="kpi-label">총 전력 용량</p>
+                    <p class="kpi-value">728 <span class="text-2xl">MW</span></p>
+                    <p class="kpi-change text-positive">+11.8% MoM</p>
+                </div>
+                <!-- 클라우드 채굴 사용자 -->
+                <div class="card text-center">
+                    <div class="flex justify-center items-center mb-2">
+                        <i data-lucide="users" class="w-8 h-8 text-indigo-400"></i>
+                    </div>
+                    <p class="kpi-label">클라우드 채굴 사용자 (25년 1분기)</p>
+                    <p class="kpi-value">607K</p>
+                    <p class="kpi-change text-positive">+89.1% YoY</p>
+                </div>
+                <!-- 6월 BTC 생산량 -->
+                <div class="card text-center col-span-2 md:col-span-1">
+                     <div class="flex justify-center items-center mb-2">
+                        <i data-lucide="pickaxe" class="w-8 h-8 text-green-400"></i>
+                    </div>
+                    <p class="kpi-label">6월 BTC 생산량</p>
+                    <p class="kpi-value">445</p>
+                    <p class="kpi-change text-positive">+11.3% MoM</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Financial Charts -->
+        <section class="mb-8">
+            <h2 class="section-title">재무 및 운영 성과</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="card">
+                    <h3 class="font-bold text-lg mb-4 text-white">분기별 실적 비교 (백만 달러)</h3>
+                    <div class="chart-container">
+                        <canvas id="quarterlyChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="font-bold text-lg mb-4 text-white">운영 지표 추이</h3>
+                    <div class="chart-container">
+                        <canvas id="operationsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analysis Sections -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- 성장성 분석 -->
+            <div class="card lg:col-span-1">
+                <h3 class="font-bold text-lg mb-3 text-white flex items-center"><i data-lucide="trending-up" class="w-5 h-5 mr-2 text-green-400"></i>성장성 분석</h3>
+                <ul class="space-y-2 text-gray-300 text-sm list-disc list-inside">
+                    <li><strong class="text-white">2024년 연간 매출</strong>은 전년 대비 크게 성장.</li>
+                    <li><strong class="text-red-400">2025년 1분기 매출</strong>은 비트코인 반감기 영향으로 전년 동기 대비 <strong class="text-red-400">46% 감소</strong>.</li>
+                    <li>클라우드 채굴 사용자 수는 <strong class="text-green-400">89.1% (YoY) 증가</strong>하며 성장 동력 유지.</li>
+                    <li>2025년 6월, 해시레이트와 전력 용량이 사상 최고치를 기록하며 <strong class="text-green-400">회복세</strong> 진입.</li>
+                </ul>
+            </div>
+            <!-- 수익성 분석 -->
+            <div class="card lg:col-span-1">
+                <h3 class="font-bold text-lg mb-3 text-white flex items-center"><i data-lucide="dollar-sign" class="w-5 h-5 mr-2 text-red-400"></i>수익성 분석</h3>
+                 <ul class="space-y-2 text-gray-300 text-sm list-disc list-inside">
+                    <li>2025년 1분기, <strong class="text-red-400">$16.9백만 순손실</strong> 기록 (전년 동기 $35.3백만 순이익).</li>
+                    <li>매출 감소 및 채굴 단가 상승으로 수익성 크게 악화.</li>
+                    <li>조정 EBITDA도 <strong class="text-red-400">-$10.8백만</strong>으로 적자 전환.</li>
+                    <li>최근 BTC 생산량 증가 및 운영 효율성 개선(<strong class="text-green-400">20.1 J/TH</strong>)으로 향후 수익성 개선 기대.</li>
+                </ul>
+            </div>
+            <!-- 안정성 분석 -->
+            <div class="card lg:col-span-1">
+                <h3 class="font-bold text-lg mb-3 text-white flex items-center"><i data-lucide="shield" class="w-5 h-5 mr-2 text-blue-400"></i>안정성 분석</h3>
+                 <ul class="space-y-2 text-gray-300 text-sm list-disc list-inside">
+                    <li>부채비율 약 <strong class="text-yellow-400">132%</strong>로 관리 가능한 수준.</li>
+                    <li>현금 및 디지털 자산 <strong class="text-white">$144.3백만</strong> 보유로 유동성 양호.</li>
+                    <li>최대 <strong class="text-green-400">$1.5억</strong> 규모의 신규 주식 공모 계획 발표.</li>
+                    <li>이를 통해 운영 확장 및 재무 건전성 강화 기대.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Strengths and Risks -->
+        <section class="mt-8">
+             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- 핵심 경쟁 우위 -->
+                <div class="card">
+                    <h2 class="section-title flex items-center"><i data-lucide="swords" class="w-6 h-6 mr-3 text-green-400"></i>핵심 경쟁 우위</h2>
+                    <ul class="space-y-3 text-gray-300 list-disc list-inside">
+                        <li><strong class="text-white">BITMAIN과의 전략적 파트너십:</strong> 최신 고효율 채굴기 독점적 공급.</li>
+                        <li><strong class="text-white">통합 채굴 생태계:</strong> 클라우드, 자체 채굴, 호스팅 등 다양한 서비스 제공.</li>
+                        <li><strong class="text-white">글로벌 인프라:</strong> 전 세계 24개 채굴 시설과 저렴한 전력 확보 능력.</li>
+                        <li><strong class="text-white">기술 혁신 (BitFuFuOS):</strong> 채굴 출력 최적화를 통한 운영 효율성 증대.</li>
+                        <li><strong class="text-white">비트코인 보유 전략:</strong> 장기적 자산 가치 상승 추구.</li>
+                    </ul>
+                </div>
+                <!-- 주요 리스크 요인 -->
+                <div class="card">
+                    <h2 class="section-title flex items-center"><i data-lucide="alert-triangle" class="w-6 h-6 mr-3 text-red-400"></i>주요 리스크 요인</h2>
+                    <ul class="space-y-3 text-gray-300 list-disc list-inside">
+                        <li><strong class="text-white">비트코인 가격 변동성:</strong> 수익성 및 자산 가치에 직접적 영향.</li>
+                        <li><strong class="text-white">채굴 난이도 증가:</strong> 지속적인 수익성 압박 요인.</li>
+                        <li><strong class="text-white">전력 비용 및 확보:</strong> 운영 비용의 핵심 변수.</li>
+                        <li><strong class="text-white">규제 환경 변화:</strong> 사업 운영의 불확실성 가중.</li>
+                        <li><strong class="text-white">하드웨어 노후화:</strong> 지속적인 업그레이드 투자 필요.</li>
+                    </ul>
+                </div>
+             </div>
+        </section>
+
+        <!-- Conclusion -->
+        <section class="mt-8 card">
+            <h2 class="section-title">종합 분석 및 결론</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-2">
+                    <p class="text-gray-300 mb-4">
+                        비트푸푸는 비트메인과의 강력한 파트너십을 기반으로 한 성장 잠재력과 암호화폐 시장의 내재된 변동성 리스크를 동시에 가진 기업입니다. 2025년 1분기 실적은 반감기 이후의 어려움을 명확히 보여주었으나, 최근 운영 지표의 회복세는 긍정적인 신호입니다.
+                    </p>
+                    <p class="text-gray-300">
+                        높은 시장 변동성에 대한 노출도가 크기 때문에, 공격적인 투자보다는 향후 비트코인 시장의 안정화와 회사의 실질적인 수익성 개선 여부를 확인하며 <strong class="text-white">'관망(Neutral)'</strong>하는 전략이 유효해 보입니다.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-3 text-white">향후 주목할 포인트</h3>
+                    <ul class="space-y-2 text-gray-300 text-sm list-disc list-inside">
+                        <li>BTC 가격 및 채굴 난이도 추이</li>
+                        <li>클라우드 채굴 서비스 성장세</li>
+                        <li>운영 효율성 및 전력 확보 전략</li>
+                        <li>신규 주식 공모의 영향</li>
+                        <li>비트코인 보유 전략의 성과</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <footer class="text-center mt-8 text-gray-500 text-sm">
+            <p>본 자료는 제공된 정보를 바탕으로 작성되었으며, 투자 추천을 의미하지 않습니다.</p>
+        </footer>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Chart.js Global Configuration
+        Chart.defaults.color = '#9CA3AF';
+        Chart.defaults.borderColor = '#374151';
+        Chart.defaults.font.family = "'Noto Sans KR', sans-serif";
+
+        // Quarterly Financial Chart
+        const quarterlyCtx = document.getElementById('quarterlyChart').getContext('2d');
+        new Chart(quarterlyCtx, {
+            type: 'bar',
+            data: {
+                labels: ['매출액', '순이익(손실)'],
+                datasets: [{
+                    label: '2024년 1분기',
+                    data: [144.4, 35.3],
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)', // Blue
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                }, {
+                    label: '2025년 1분기',
+                    data: [78.0, -16.9],
+                    backgroundColor: 'rgba(239, 68, 68, 0.7)', // Red
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y) + 'M';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: '백만 달러 (USD)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Operations Trend Chart
+        const operationsCtx = document.getElementById('operationsChart').getContext('2d');
+        new Chart(operationsCtx, {
+            type: 'line',
+            data: {
+                labels: ['24년 3월', '25년 3월', '25년 6월'],
+                datasets: [{
+                    label: '총 해시레이트 (EH/s)',
+                    data: [28.6, 20.6, 36.2],
+                    borderColor: 'rgba(34, 211, 238, 1)', // Cyan
+                    backgroundColor: 'rgba(34, 211, 238, 0.2)',
+                    fill: true,
+                    tension: 0.3,
+                    yAxisID: 'y'
+                }, {
+                    label: '총 전력 용량 (MW)',
+                    data: [644, 478, 728],
+                    borderColor: 'rgba(251, 146, 60, 1)', // Orange
+                    backgroundColor: 'rgba(251, 146, 60, 0.2)',
+                    fill: false,
+                    tension: 0.3,
+                    yAxisID: 'y1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    title: { display: false },
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: '해시레이트 (EH/s)'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: '전력 용량 (MW)'
+                        },
+                        grid: {
+                            drawOnChartArea: false, 
+                        },
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
